@@ -6,7 +6,7 @@ export interface UserProfile {
 }
 
 export interface Club {
-    id: number;
+    id: string;
     title: string;
     description: string;
     image: string;
@@ -15,6 +15,7 @@ export interface Club {
     members: number;
     schedule: string;
     matchScore: number;
+    author:string;
 }
 
 export interface Notice {

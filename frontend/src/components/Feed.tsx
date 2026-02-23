@@ -11,59 +11,7 @@ interface FeedProps {
     onJoin: (club: Club) => void;
 }
 
-export function Feed({ user, activeFilter, setActiveFilter, onJoin }: FeedProps) {
-    const [clubs, setClubs] = useState<Club[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    // Default it to whichever department makes the most sense
-const [imageDepartment, setImageDepartment] = useState<string>('Burn Energy');
-
-    // Create Event state
-    const [showCreateForm, setShowCreateForm] = useState(false);
-    const [isPosting, setIsPosting] = useState(false);
-    const [newEventTitle, setNewEventTitle] = useState('');
-    const [newEventDescription, setNewEventDescription] = useState('');
-    const [newEventCategory, setNewEventCategory] = useState('Burn Energy');
-    const [newEventTags, setNewEventTags] = useState('');
-    const [newEventSchedule, setNewEventSchedule] = useState('');
-
-    const filters = ['All Clubs', 'Burn Energy', 'Clear Head', 'Find People'];
-
-
-
-    useEffect(() => {
-        fetchEvents();
-    }, []);
-
-    const fetchEvents = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-        const response = await fetch(EVENTS_API);
-        
-        if (!response.ok) {
-            throw new Error(`Server responded with ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        // MongoDB returns _id, but your ClubCard likely uses .id
-        // We map them here so your existing components don't break
-        const formattedData = data.map((event: any) => ({
-            ...event,
-            id: event._id || event.id 
-        }));
-
-        setClubs(formattedData);
-    } catch (err) {
-        console.error("Fetch error:", err);
-        setError("The backend is taking a moment to wake up. Please wait or refresh in 30 seconds.");
-    } finally {
-        setIsLoading(false);
-    }
-};
-
-// 1. Define image pools for each category
+// 1. Image pools for random selection based on Activity Type
 const IMAGES_BY_CATEGORY: Record<string, string[]> = {
     'Cardio': [
         'https://images.unsplash.com/photo-1517836357463-d25dfe09ce14?auto=format&fit=crop&q=80&w=600',
@@ -82,58 +30,111 @@ const IMAGES_BY_CATEGORY: Record<string, string[]> = {
     ]
 };
 
-// 2. Update the handleCreateEvent function
-const handleCreateEvent = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newEventTitle.trim() || !newEventDescription.trim()) return;
+export function Feed({ user, activeFilter, setActiveFilter, onJoin }: FeedProps) {
+    const [clubs, setClubs] = useState<Club[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    setIsPosting(true);
+    // Form States
+    const [showCreateForm, setShowCreateForm] = useState(false);
+    const [isPosting, setIsPosting] = useState(false);
+    const [newEventTitle, setNewEventTitle] = useState('');
+    const [newEventDescription, setNewEventDescription] = useState('');
+    const [newEventCategory, setNewEventCategory] = useState('Burn Energy');
+    const [imageDepartment, setImageDepartment] = useState<string>('Cardio');
+    const [newEventTags, setNewEventTags] = useState('');
+    const [newEventSchedule, setNewEventSchedule] = useState('');
 
-    // Get the pool for the specifically selected image department dropdown
-    const pool = IMAGES_BY_CATEGORY[imageDepartment] || IMAGES_BY_CATEGORY['Burn Energy'];
-    
-    // Select a random image from that specific pool
-    const randomImage = pool[Math.floor(Math.random() * pool.length)];
+    const filters = ['All Clubs', 'Burn Energy', 'Clear Head', 'Find People'];
 
-    const newEventData = {
-        title: newEventTitle,
-        description: newEventDescription,
-        category: newEventCategory, // Event category stays independent
-        tags: newEventTags.split(',').map(tag => tag.trim()).filter(Boolean),
-        schedule: newEventSchedule || 'TBD',
-        image: randomImage, // Assign the random department-specific image
-        members: 1,
-        matchScore: 100,
-        author: user.name 
+    useEffect(() => {
+        fetchEvents();
+    }, []);
+
+    const fetchEvents = async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const response = await fetch(EVENTS_API);
+            if (!response.ok) throw new Error(`Server error: ${response.status}`);
+            const data = await response.json();
+
+            const formattedData = data.map((event: any) => ({
+                ...event,
+                id: event._id?.toString() || event.id
+            }));
+            setClubs(formattedData);
+        } catch (err) {
+            setError("The backend is waking up. Please wait or refresh in 30 seconds.");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
-    try {
-        const response = await fetch(EVENTS_API, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newEventData),
-        });
+    const handleCreateEvent = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!newEventTitle.trim() || !newEventDescription.trim()) return;
 
-        if (response.ok) {
-            const savedEvent = await response.json();
-            
-            // Transform the MongoDB _id to id so the UI/Key props don't break
-            const formattedEvent = {
-                ...savedEvent,
-                id: savedEvent._id 
-            };
+        setIsPosting(true);
+        const pool = IMAGES_BY_CATEGORY[imageDepartment] || IMAGES_BY_CATEGORY['Cardio'];
+        const randomImage = pool[Math.floor(Math.random() * pool.length)];
 
-            setClubs(prevClubs => [formattedEvent, ...prevClubs]);
-            resetForm();
-            // Optional: reset imageDepartment to default here if needed
+        const newEventData = {
+            title: newEventTitle,
+            description: newEventDescription,
+            category: newEventCategory,
+            tags: newEventTags.split(',').map(tag => tag.trim()).filter(Boolean),
+            schedule: newEventSchedule || 'TBD',
+            image: randomImage,
+            members: 1,
+            matchScore: 100,
+            author: user.name
+        };
+
+        try {
+            const response = await fetch(EVENTS_API, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newEventData),
+            });
+
+            if (response.ok) {
+                const savedEvent = await response.json();
+                setClubs(prev => [{ ...savedEvent, id: savedEvent.id || savedEvent._id }, ...prev]);
+                resetForm();
+            }
+        } catch (err) {
+            alert("Failed to post event.");
+        } finally {
+            setIsPosting(false);
         }
-    } catch (err) {
-        console.error("Error posting event:", err);
-        alert("Failed to post event. Please check if the Render backend is awake!");
-    } finally {
-        setIsPosting(false);
-    }
-};
+    };
+
+    const handleDeleteEvent = async (eventId: string, authorName: string) => {
+        if (user.name !== authorName) {
+            alert("Unauthorized.");
+            return;
+        }
+
+        if (!window.confirm("Delete this event permanently?")) return;
+
+        try {
+            const response = await fetch(`${EVENTS_API}/${eventId}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userName: user.name })
+            });
+
+            if (response.ok) {
+                setClubs(prev => prev.filter(club => club.id !== eventId));
+            } else {
+                const data = await response.json();
+                alert(data.message || "Delete failed.");
+            }
+        } catch (err) {
+            alert("Server error during deletion.");
+        }
+    };
 
     const resetForm = () => {
         setNewEventTitle('');
@@ -151,15 +152,16 @@ const handleCreateEvent = async (e: React.FormEvent) => {
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
+            {/* Header section */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="space-y-2">
                     <h1 className="text-3xl font-bold tracking-tight">Hey, {user.name}</h1>
-                    <p className="text-gray-500 text-lg">Here are events matched to your vibe. You can also start your own event.</p>
+                    <p className="text-gray-500 text-lg">Here are events matched to your vibe.</p>
                 </div>
                 {!showCreateForm && (
                     <button
                         onClick={() => setShowCreateForm(true)}
-                        className="inline-flex items-center justify-center px-4 py-2.5 bg-[#18452B] text-white font-medium rounded-xl hover:bg-[#123620] transition-colors shadow-sm self-start sm:self-auto"
+                        className="inline-flex items-center justify-center px-4 py-2.5 bg-[#18452B] text-white font-medium rounded-xl hover:bg-[#123620] transition-colors shadow-sm"
                     >
                         <Plus size={20} className="mr-2" />
                         Start Event
@@ -170,136 +172,90 @@ const handleCreateEvent = async (e: React.FormEvent) => {
             {/* Create Event Form */}
             {showCreateForm && (
                 <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-8">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">Create a New Event</h2>
-                <form onSubmit={handleCreateEvent} className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                    <h2 className="text-xl font-bold text-gray-900 mb-4">Create a New Event</h2>
+                    <form onSubmit={handleCreateEvent} className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <input
                                 type="text"
+                                placeholder="Event Title"
                                 value={newEventTitle}
                                 onChange={(e) => setNewEventTitle(e.target.value)}
-                                placeholder="e.g., Weekend Hike"
-                                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-green-500"
                                 required
-                                disabled={isPosting}
                             />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
                             <select
                                 value={newEventCategory}
                                 onChange={(e) => setNewEventCategory(e.target.value)}
-                                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
-                                disabled={isPosting}
+                                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl"
                             >
                                 <option value="Burn Energy">Burn Energy</option>
                                 <option value="Clear Head">Clear Head</option>
                                 <option value="Find People">Find People</option>
                             </select>
                         </div>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                         <textarea
+                            placeholder="Description"
                             value={newEventDescription}
                             onChange={(e) => setNewEventDescription(e.target.value)}
-                            placeholder="What is this event about?"
+                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl resize-none"
                             rows={3}
-                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none resize-none"
                             required
-                            disabled={isPosting}
                         />
-                    </div>
-
-                    {/* Updated Grid: Now contains Tags, Schedule, and Image Department */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Tags (comma separated)</label>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <input
                                 type="text"
+                                placeholder="Tags (e.g. #Hike, #Sun)"
                                 value={newEventTags}
                                 onChange={(e) => setNewEventTags(e.target.value)}
-                                placeholder="e.g., #Hiking, #Outdoors"
-                                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
-                                disabled={isPosting}
+                                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl"
                             />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Schedule</label>
                             <input
                                 type="text"
+                                placeholder="Schedule (e.g. Sat 10AM)"
                                 value={newEventSchedule}
                                 onChange={(e) => setNewEventSchedule(e.target.value)}
-                                placeholder="e.g., Saturday at 10 AM"
-                                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
-                                disabled={isPosting}
+                                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl"
                             />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Activity Type</label>
                             <select
                                 value={imageDepartment}
                                 onChange={(e) => setImageDepartment(e.target.value)}
-                                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
-                                disabled={isPosting}
+                                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl"
                             >
-                                {/* Make sure these values map exactly to the keys in your IMAGES_BY_CATEGORY object */}
-                                <option value="Cardio">Cardio</option>
-                                <option value="Running">Running</option>
-                                <option value="Meditation">Meditation</option>
+                                <option value="Cardio">Cardio Images</option>
+                                <option value="Running">Running Images</option>
+                                <option value="Meditation">Meditation Images</option>
                             </select>
                         </div>
-                    </div>
-
-                    <div className="flex items-center justify-end gap-3 pt-4">
-                        <button
-                            type="button"
-                            onClick={resetForm}
-                            className="px-4 py-2 text-gray-600 font-medium hover:text-gray-900 transition-colors"
-                            disabled={isPosting}
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={isPosting || !newEventTitle.trim() || !newEventDescription.trim()}
-                            className="inline-flex items-center px-6 py-2 bg-[#18452B] text-white font-medium rounded-xl hover:bg-[#123620] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-                        >
-                            {isPosting ? (
-                                <>
-                                    <Loader2 size={18} className="animate-spin mr-2" />
-                                    Creating...
-                                </>
-                            ) : (
-                                'Create Event'
-                            )}
-                        </button>
-                    </div>
-                </form>
-            </div>
+                        <div className="flex justify-end gap-3">
+                            <button type="button" onClick={resetForm} className="px-4 py-2 text-gray-500">Cancel</button>
+                            <button
+                                type="submit"
+                                disabled={isPosting}
+                                className="px-6 py-2 bg-[#18452B] text-white rounded-xl disabled:opacity-50"
+                            >
+                                {isPosting ? 'Creating...' : 'Create Event'}
+                            </button>
+                        </div>
+                    </form>
+                </div>
             )}
 
+            {/* Filter Bar */}
             <div className="flex flex-col sm:flex-row gap-4 items-center">
                 <div className="relative flex-grow max-w-md w-full">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                     <input
                         type="text"
-                        placeholder="Search events, tags..."
-                        className="w-full pl-10 pr-4 py-2.5 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#18452B]/20 focus:border-[#18452B] transition-all bg-white shadow-sm"
+                        placeholder="Search events..."
+                        className="w-full pl-10 pr-4 py-2.5 rounded-full border border-gray-200 focus:ring-2 focus:ring-[#18452B]/20 outline-none"
                     />
                 </div>
-
-                <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0 w-full sm:w-auto hide-scrollbar">
+                <div className="flex gap-2 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0">
                     {filters.map(filter => (
                         <button
                             key={filter}
                             onClick={() => setActiveFilter(filter)}
-                            className={`whitespace-nowrap px-5 py-2.5 rounded-full text-sm font-semibold transition-colors ${activeFilter === filter
-                                ? 'bg-[#18452B] text-white shadow-md'
-                                : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
-                                }`}
+                            className={`whitespace-nowrap px-5 py-2.5 rounded-full text-sm font-semibold transition-colors ${activeFilter === filter ? 'bg-[#18452B] text-white shadow-md' : 'bg-white text-gray-600 border border-gray-200'}`}
                         >
                             {filter}
                         </button>
@@ -307,31 +263,28 @@ const handleCreateEvent = async (e: React.FormEvent) => {
                 </div>
             </div>
 
+            {/* Event Grid */}
             {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-20">
-                    <Loader2 size={32} className="animate-spin text-[#18452B] mb-4" />
-                    <p className="text-gray-500 font-medium">Loading events...</p>
+                    <Loader2 size={32} className="animate-spin text-[#18452B]" />
                 </div>
             ) : error ? (
-                <div className="bg-red-50 border border-red-100 rounded-2xl p-6 flex flex-col items-center text-center">
-                    <AlertCircle size={32} className="text-red-500 mb-3" />
-                    <h3 className="text-lg font-bold text-red-800 mb-1">Oops!</h3>
-                    <p className="text-red-600">{error}</p>
-                    <button
-                        onClick={fetchEvents}
-                        className="mt-4 px-4 py-2 bg-red-100 text-red-700 font-medium rounded-lg hover:bg-red-200 transition-colors"
-                    >
-                        Try Again
-                    </button>
+                <div className="text-center py-20 text-red-600">
+                    <AlertCircle size={32} className="mx-auto mb-2" />
+                    <p>{error}</p>
                 </div>
             ) : filteredClubs.length === 0 ? (
-                <div className="bg-white border border-gray-100 rounded-2xl p-12 text-center text-gray-500">
-                    <p className="text-lg">No events found.</p>
-                </div>
+                <div className="bg-white border rounded-2xl p-12 text-center text-gray-500">No events found.</div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredClubs.map(club => (
-                        <ClubCard key={club.id} club={club} onJoin={() => onJoin(club)} />
+                        <ClubCard
+                            key={club.id}
+                            club={club}
+                            onJoin={() => onJoin(club)}
+                            currentUser={user.name}
+                            onDelete={handleDeleteEvent}
+                        />
                     ))}
                 </div>
             )}
