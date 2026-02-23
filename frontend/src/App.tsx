@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import type { UserProfile, Club } from './types';
-import { INITIAL_CLUBS } from './constants';
 import { Navbar } from './components/Navbar';
 import { Onboarding } from './components/Onboarding';
 import { Feed } from './components/Feed';
 import { Matchmaker } from './components/Matchmaker';
 import { Profile } from './components/Profile';
 import { RsvpModal } from './components/RsvpModal';
+import { Noticeboard } from './components/Noticeboard';
 
 // --- Main App Component ---
 export default function App() {
@@ -20,7 +20,6 @@ export default function App() {
   });
 
   const [currentView, setCurrentView] = useState<string>('feed'); // feed, matchmaker, profile
-  const [clubs, setClubs] = useState<Club[]>(INITIAL_CLUBS);
   const [activeFilter, setActiveFilter] = useState<string>('All Clubs');
   const [rsvpModal, setRsvpModal] = useState<{ isOpen: boolean; club: Club | null }>({ isOpen: false, club: null });
 
@@ -59,20 +58,20 @@ export default function App() {
       case 'feed':
         return <Feed
           user={user}
-          clubs={clubs}
           activeFilter={activeFilter}
           setActiveFilter={setActiveFilter}
           onJoin={(club) => setRsvpModal({ isOpen: true, club })}
         />;
       case 'matchmaker':
-        return <Matchmaker onNewClubsFound={(newClubs) => {
-          setClubs([...newClubs, ...clubs]);
+        return <Matchmaker onMatchmakerComplete={() => {
           setCurrentView('feed');
         }} />;
       case 'profile':
         return <Profile user={user} setUser={setUser} />;
+      case 'noticeboard':
+        return <Noticeboard userName={user.name} />;
       default:
-        return <Feed user={user} clubs={clubs} activeFilter={activeFilter} setActiveFilter={setActiveFilter} onJoin={(club) => setRsvpModal({ isOpen: true, club })} />;
+        return <Feed user={user} activeFilter={activeFilter} setActiveFilter={setActiveFilter} onJoin={(club) => setRsvpModal({ isOpen: true, club })} />;
     }
   };
 

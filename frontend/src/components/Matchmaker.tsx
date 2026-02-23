@@ -4,10 +4,10 @@ import type { Club } from '../types';
 import { apiKey } from '../constants';
 
 interface MatchmakerProps {
-    onNewClubsFound: (clubs: Club[]) => void;
+    onMatchmakerComplete: () => void;
 }
 
-export function Matchmaker({ onNewClubsFound }: MatchmakerProps) {
+export function Matchmaker({ onMatchmakerComplete }: MatchmakerProps) {
     const [feeling, setFeeling] = useState<string>('');
     const [goals, setGoals] = useState<string>('');
     const [isGenerating, setIsGenerating] = useState<boolean>(false);
@@ -52,34 +52,34 @@ Based on the user's feelings and goals, generate exactly 3 clubs.`;
             };
 
             const url =
-`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
             const payload = {
                 contents: [
                     {
-                    role: "user",
-                    parts: [
-                        {
-                        text:
-                            systemPrompt +
-                            "\n\n" +
-                            userPrompt +
-                            "\n\nReturn ONLY valid JSON in this format:\n" +
-                            JSON.stringify({
-                            clubs: [
-                                {
-                                title: "string",
-                                description: "string",
-                                tags: ["string"],
-                                category: "Burn Energy | Clear Head | Find People",
-                                schedule: "string"
-                                }
-                            ]
-                            })
-                        }
-                    ]
+                        role: "user",
+                        parts: [
+                            {
+                                text:
+                                    systemPrompt +
+                                    "\n\n" +
+                                    userPrompt +
+                                    "\n\nReturn ONLY valid JSON in this format:\n" +
+                                    JSON.stringify({
+                                        clubs: [
+                                            {
+                                                title: "string",
+                                                description: "string",
+                                                tags: ["string"],
+                                                category: "Burn Energy | Clear Head | Find People",
+                                                schedule: "string"
+                                            }
+                                        ]
+                                    })
+                            }
+                        ]
                     }
                 ]
-                };
+            };
 
             const result = await fetchWithRetry(url, {
                 method: 'POST',
@@ -92,11 +92,11 @@ Based on the user's feelings and goals, generate exactly 3 clubs.`;
             if (!text) throw new Error("No valid response from AI");
 
             const cleanText = text
-            .replace(/```json/g, "")
-            .replace(/```/g, "")
-            .trim();
+                .replace(/```json/g, "")
+                .replace(/```/g, "")
+                .trim();
 
-const parsed = JSON.parse(cleanText);
+            const parsed = JSON.parse(cleanText);
 
             const newClubs: Club[] = parsed.clubs.map((c: any, i: number) => {
                 const images: Record<string, string[]> = {
@@ -120,7 +120,24 @@ const parsed = JSON.parse(cleanText);
                 };
             });
 
-            onNewClubsFound(newClubs);
+            // Post the newly generated clubs to the backend
+            const API_URL = import.meta.env.VITE_RENDER_SERVER_URL + '/api/events';
+
+            if (import.meta.env.VITE_RENDER_SERVER_URL && import.meta.env.VITE_RENDER_SERVER_URL !== 'undefined') {
+                for (const club of newClubs) {
+                    try {
+                        await fetch(API_URL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(club)
+                        });
+                    } catch (postErr) {
+                        console.error("Failed to post generated club details:", postErr);
+                    }
+                }
+            }
+
+            onMatchmakerComplete();
 
         } catch (err) {
             console.error(err);

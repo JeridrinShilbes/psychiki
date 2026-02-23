@@ -1,4 +1,4 @@
-import { Activity, LayoutGrid, Sparkles, User as UserIcon, LogOut } from 'lucide-react';
+import { Activity, LayoutGrid, Sparkles, User as UserIcon, LogOut, ClipboardList } from 'lucide-react';
 
 interface NavbarProps {
     currentView: string;
@@ -11,6 +11,7 @@ export function Navbar({ currentView, setCurrentView, userName, onLogout }: Navb
     const navItems = [
         { id: 'feed', label: 'Feed', icon: LayoutGrid },
         { id: 'matchmaker', label: 'Matchmaker', icon: Sparkles },
+        { id: 'noticeboard', label: 'Noticeboard', icon: ClipboardList },
         { id: 'profile', label: 'Profile', icon: UserIcon },
     ];
 

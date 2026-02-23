@@ -16,3 +16,11 @@ export interface Club {
     schedule: string;
     matchScore: number;
 }
+
+export interface Notice {
+    id: number;
+    title: string;
+    content: string;
+    author: string;
+    createdAt: string;
+}
