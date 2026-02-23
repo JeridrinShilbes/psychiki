@@ -14,19 +14,43 @@ interface FeedProps {
 // 1. Image pools for random selection based on Activity Type
 const IMAGES_BY_CATEGORY: Record<string, string[]> = {
     'Cardio': [
-        'https://images.unsplash.com/photo-1517836357463-d25dfe09ce14?auto=format&fit=crop&q=80&w=600',
-        'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80&w=600',
-        'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&q=80&w=600'
+        'https://youfit.com/wp-content/uploads/2024/04/YouFit-Oakland-Park-02-22-23_046-Edit.jpg',
+        'https://blog.muscleblaze.com/wp-content/uploads/2024/12/Artboard-3.png'
     ],
     'Running': [
-        'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=600',
-        'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=600',
-        'https://images.unsplash.com/photo-1508672019048-805c876b67e2?auto=format&fit=crop&q=80&w=600'
+        'https://hips.hearstapps.com/hmg-prod/images/happy-and-joggers-royalty-free-image-1696346737.jpg?crop=0.88847xw:1xh;center,top&resize=1200:*',
+        'https://i.natgeofe.com/n/e044eb85-f74d-4ba9-8958-d875f5183f66/h_16089728.jpg'
     ],
     'Meditation': [
-        'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&q=80&w=600',
-        'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&q=80&w=600',
-        'https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&q=80&w=600'
+        'https://img.freepik.com/free-photo/yoga-class-concept_53876-47114.jpg',
+        'https://img.freepik.com/free-photo/group-young-sporty-people-sitting-sukhasana-exercise_1163-4940.jpg?w=360'
+    ],
+    'Weight Training': [
+        'https://hips.hearstapps.com/hmg-prod/images/strength-training-66ed958d3de94.jpg?crop=0.670xw:1.00xh;0.111xw,0&resize=1200:*',
+        'https://i0.wp.com/www.strengthlog.com/wp-content/uploads/2022/11/Strength-training-programs.jpg?fit=1988%2C1327&ssl=1'
+    ],
+    'Hiking': [
+        'https://www.pcta.org/wp-content/uploads/2015/12/how-many-people-hike-the-pacific-crest-trail.jpg',
+        'https://adventures.com/media/9939/hiking-trek-group-people.jpg'
+    ],
+    'Swimming': [
+        'https://img.olympics.com/images/image/private/t_s_pog_staticContent_hero_lg/f_auto/primary/piultz6nngltq541xmju',
+        'https://plus.unsplash.com/premium_photo-1661855484909-b76b427d0f9b?fm=jpg&q=60&w=3000&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8c3dpbW1pbmclMjBjb21wZXRpdGlvbnxlbnwwfHwwfHx8MA%3D%3D'
+    ],
+    'Cycling': [
+        'https://cdn.shopify.com/s/files/1/0551/0388/1250/files/cycling_benefits_styrkr.jpg?v=1676894320',
+        'https://images.unsplash.com/photo-1517649763962-0c623066013b?fm=jpg&q=60&w=3000&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8Y3ljbGluZ3xlbnwwfHwwfHx8MA%3D%3D'
+    ],
+    'Pilates': [
+        'https://images.ctfassets.net/ipjoepkmtnha/5nTW9GvNYKtjJukcotDgji/c9cffb3fb04dfe4e7407153f371054dd/TG_REFORM_TechnoGym_Classe_-_12_1198_ADV__1_.jpg',
+        'https://thecore.pilates.com/wp-content/uploads/2024/09/2409-Pilates-for-Athletes_A-Whole-Body-Approach_Core-Feature-1536x937.jpg'
+    ],
+    'Sports': [
+        'https://ffprod.blob.core.windows.net/media/Boys%20playing_0-optimised_5-optimised.jpg',
+        'https://media.istockphoto.com/id/884279594/photo/athlete-in-action.jpg?s=612x612&w=0&k=20&c=bjlDnHrZSx8WzA8K8wUXXzPGuolhhHTEzjtQ3lFnHW8='
+    ],
+    'Other': [
+        'https://i1.sndcdn.com/artworks-lGFo9Z2ozhGXb18z-oBoI3g-t500x500.jpg'
     ]
 };
 
@@ -221,9 +245,17 @@ export function Feed({ user, activeFilter, setActiveFilter, onJoin }: FeedProps)
                                 onChange={(e) => setImageDepartment(e.target.value)}
                                 className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl"
                             >
-                                <option value="Cardio">Cardio Images</option>
-                                <option value="Running">Running Images</option>
-                                <option value="Meditation">Meditation Images</option>
+                                <option value="Cardio">Cardio</option>
+                                <option value="Running">Running</option>
+                                <option value="Meditation">Meditation</option>
+                                <option value="Weight Training">Weight Training</option>
+                                <option value="Hiking">Hiking</option>
+                                <option value="Swimming">Swimming</option>
+                                <option value="Cycling">Cycling</option>
+                                <option value="Pilates">Pilates</option>
+                                <option value="Martial Arts">Martial Arts</option>
+                                <option value="Sports">Sports</option>
+                                <option value="Other">Other</option>
                             </select>
                         </div>
                         <div className="flex justify-end gap-3">
