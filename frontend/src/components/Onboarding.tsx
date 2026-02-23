@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Activity, Flame, Wind, HeartHandshake, ArrowRight } from 'lucide-react';
+import { Flame, Wind, HeartHandshake, ArrowRight } from 'lucide-react';
 
 interface OnboardingProps {
     onComplete: (focus: string) => void;
@@ -15,8 +15,8 @@ export function Onboarding({ onComplete, onSignOut }: OnboardingProps) {
             title: 'Burn Energy',
             description: 'Physical exhaustion, endorphins, fitness goals.\n\nPairs you with running, HIIT, and high-intensity clubs where you push limits and feel alive.',
             icon: Flame,
-            bgImage: 'https://images.unsplash.com/photo-1552674605-db6aea4df4c9?auto=format&fit=crop&q=80&w=600',
-            overlay: 'from-[#D65D20] via-[#D65D20]/90 to-[#D65D20]/60',
+            bgImage: 'https://i.redd.it/098i3veoa4aa1.jpg',
+            overlay: 'from-[#D65D20] via-[#D65D20]/50 to-[#D65D20]/25',
             activeRing: 'ring-[#D65D20]'
         },
         {
@@ -25,7 +25,7 @@ export function Onboarding({ onComplete, onSignOut }: OnboardingProps) {
             description: 'Mental decompression, mindfulness, low-impact.\n\nConnects you with yoga, stretching, breathwork, and silent reading clubs for peace of mind.',
             icon: Wind,
             bgImage: 'https://images.unsplash.com/photo-1499209974431-9dddcece7f88?auto=format&fit=crop&q=80&w=600',
-            overlay: 'from-[#209A82] via-[#209A82]/90 to-[#209A82]/60',
+            overlay: 'from-[#209A82] via-[#209A82]/50 to-[#209A82]/25',
             activeRing: 'ring-[#209A82]'
         },
         {
@@ -33,8 +33,8 @@ export function Onboarding({ onComplete, onSignOut }: OnboardingProps) {
             title: 'Find My People',
             description: 'Deep socializing, venting, shared struggles.\n\nMatches you with walking-and-talking groups and post-workout coffee clubs built for real connection.',
             icon: HeartHandshake,
-            bgImage: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&q=80&w=600',
-            overlay: 'from-[#364A9F] via-[#364A9F]/90 to-[#364A9F]/60',
+            bgImage: 'https://thumbs.dreamstime.com/b/female-athlete-chatting-other-participant-taking-break-339932071.jpg',
+            overlay: 'from-[#364A9F] via-[#364A9F]/50 to-[#364A9F]/25',
             activeRing: 'ring-[#364A9F]'
         }
     ];
@@ -43,10 +43,24 @@ export function Onboarding({ onComplete, onSignOut }: OnboardingProps) {
         <div className="min-h-screen bg-[#FAFAFA] flex flex-col relative font-sans">
             <header className="absolute top-0 w-full p-6 flex justify-between items-center z-10">
                 <div className="flex items-center gap-2">
-                    <div className="bg-[#18452B] text-white p-1.5 rounded-md">
-                        <Activity size={20} strokeWidth={3} />
+                    <div className="flex items-center gap-2">
+                        {/* This is the raw SVG code for a thin, minimalistic temple */}
+                        <svg
+                            viewBox="0 0 100 100"
+                            className="h-15 w-auto text-gray-800"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="3"
+                        >
+                            <path d="M20 40 L50 20 L80 40" /> {/* Roof */}
+                            <path d="M20 45 H80" />          {/* Top Base */}
+                            <path d="M30 45 V75" />          {/* Left Column */}
+                            <path d="M50 45 V75" />          {/* Middle Column */}
+                            <path d="M70 45 V75" />          {/* Right Column */}
+                            <path d="M20 80 H80" />          {/* Bottom Base */}
+                        </svg>
+                        <span className="font-bold text-2xl tracking-tight text-gray-900">Psychiki</span>
                     </div>
-                    <span className="font-bold text-xl tracking-tight text-gray-900">Psychiki</span>
                 </div>
                 <button onClick={onSignOut} className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">
                     Sign out
@@ -55,13 +69,10 @@ export function Onboarding({ onComplete, onSignOut }: OnboardingProps) {
 
             <div className="flex-1 flex flex-col items-center justify-center p-6 w-full max-w-6xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 mt-16 lg:mt-0">
                 <div className="text-center space-y-4 mb-12">
-                    <p className="text-xs font-bold tracking-widest text-[#D65D20] uppercase">
-                        Step 1 of 1
-                    </p>
-                    <h1 className="text-5xl font-extrabold text-gray-900 tracking-tight">
+                    <h1 className="text-7xl font-extrabold text-gray-900 tracking-tight">
                         What brings you here?
                     </h1>
-                    <p className="text-lg text-gray-500 font-medium">
+                    <p className="text-xl text-gray-500 font-medium">
                         Choose your primary focus. This helps us match you with the right micro-clubs.
                     </p>
                 </div>
