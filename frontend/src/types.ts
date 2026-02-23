@@ -15,7 +15,10 @@ export interface Club {
     members: number;
     schedule: string;
     matchScore: number;
-    author:string;
+    author: string;
+    lat?: number;
+    lng?: number;
+    distance?: number;
 }
 
 export interface Notice {

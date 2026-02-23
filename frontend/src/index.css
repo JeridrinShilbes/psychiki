@@ -24,3 +24,52 @@ body {
   background-size: 400% 400%;
   animation: gradientBG 15s ease infinite;
 }
+
+/* Custom Avatar Marker styling */
+.custom-avatar-marker {
+  background: transparent;
+  border: none;
+}
+
+.custom-avatar-marker img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 3px solid white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
+  object-fit: cover;
+}
+
+/* Custom Leaflet Popup Styling */
+.custom-popup .leaflet-popup-content-wrapper {
+  padding: 0;
+  overflow: hidden;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+  border: none;
+  background: transparent;
+}
+
+.custom-popup .leaflet-popup-content {
+  margin: 0;
+  width: 220px !important;
+  font-family: 'Inter', sans-serif;
+}
+
+.custom-popup .leaflet-popup-tip-container {
+  margin-top: -1px;
+}
+
+.custom-popup .leaflet-popup-tip {
+  background: white;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.4);
+}
+
+a.leaflet-popup-close-button {
+  color: white !important;
+  text-shadow: 0px 1px 3px rgba(0, 0, 0, 0.8);
+  font-size: 20px !important;
+  top: 8px !important;
+  right: 8px !important;
+  z-index: 10;
+}

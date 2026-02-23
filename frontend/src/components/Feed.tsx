@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Search, Plus, Loader2, AlertCircle } from 'lucide-react';
+import { Search, Plus, Loader2, AlertCircle, Map as MapIcon, Grid as GridIcon } from 'lucide-react';
 import type { UserProfile, Club } from '../types';
 import { ClubCard } from './ClubCard';
+import { EventMap } from './EventMap';
 import { EVENTS_API } from '../constants';
 
 interface FeedProps {
@@ -58,9 +59,12 @@ export function Feed({ user, activeFilter, setActiveFilter, onJoin }: FeedProps)
     const [clubs, setClubs] = useState<Club[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [viewMode, setViewMode] = useState<'grid' | 'map'>('map');
+    const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
 
     // Form States
     const [showCreateForm, setShowCreateForm] = useState(false);
+    const [selectedLocation, setSelectedLocation] = useState<{ lat: number, lng: number } | null>(null);
     const [isPosting, setIsPosting] = useState(false);
     const [newEventTitle, setNewEventTitle] = useState('');
     const [newEventDescription, setNewEventDescription] = useState('');
@@ -69,9 +73,29 @@ export function Feed({ user, activeFilter, setActiveFilter, onJoin }: FeedProps)
     const [newEventTags, setNewEventTags] = useState('');
     const [newEventSchedule, setNewEventSchedule] = useState('');
 
-    const filters = ['All Clubs', 'Burn Energy', 'Clear Head', 'Find People'];
+    const filters = ['All Clubs', 'Closest 5', 'Burn Energy', 'Clear Head', 'Find People'];
+
+    // Haversine formula to calculate distance in km
+    const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+        const R = 6371; // Radius of the earth in km
+        const dLat = (lat2 - lat1) * (Math.PI / 180);
+        const dLon = (lon2 - lon1) * (Math.PI / 180);
+        const a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c; // Distance in km
+    };
 
     useEffect(() => {
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                setUserLocation([position.coords.latitude, position.coords.longitude]);
+            }, (error) => {
+                console.error("Error getting location: ", error);
+            });
+        }
         fetchEvents();
     }, []);
 
@@ -112,7 +136,8 @@ export function Feed({ user, activeFilter, setActiveFilter, onJoin }: FeedProps)
             image: randomImage,
             members: 1,
             matchScore: 100,
-            author: user.name
+            author: user.name,
+            ...(selectedLocation ? { lat: selectedLocation.lat, lng: selectedLocation.lng } : {})
         };
 
         try {
@@ -147,7 +172,7 @@ export function Feed({ user, activeFilter, setActiveFilter, onJoin }: FeedProps)
         try {
             const response = await fetch(`${EVENTS_API}/${eventId}`, {
                 method: 'DELETE',
-                headers: { 'Content-Type': 'application/json','x-user-name':user.name },
+                headers: { 'Content-Type': 'application/json', 'x-user-name': user.name },
                 body: JSON.stringify({ userName: user.name })
             });
 
@@ -170,11 +195,41 @@ export function Feed({ user, activeFilter, setActiveFilter, onJoin }: FeedProps)
         setNewEventSchedule('');
         setShowCreateForm(false);
         setIsPosting(false);
+        setSelectedLocation(null);
     };
 
+    const handleMapClick = (lat: number, lng: number) => {
+        setSelectedLocation({ lat, lng });
+        setShowCreateForm(true);
+    };
+
+    const getEventPosition = (event: Club): [number, number] => {
+        if (event.lat && event.lng) return [event.lat, event.lng];
+        // Deterministic offset based on ID
+        const baseCenter = userLocation || [51.505, -0.09];
+        let hash = 0;
+        const str = event.id ? event.id.toString() : event.title;
+        for (let i = 0; i < str.length; i++) {
+            hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const offsetLat = (Math.abs(hash) % 100) / 1000 - 0.05; // -0.05 to +0.05
+        const offsetLng = (Math.abs(hash * 13) % 100) / 1000 - 0.05;
+        return [baseCenter[0] + offsetLat, baseCenter[1] + offsetLng];
+    };
+
+    // Calculate distance for all clubs if userLocation is available
+    const clubsWithDistance = clubs.map(club => {
+        if (!userLocation) return club;
+        const [eventLat, eventLng] = getEventPosition(club);
+        const distance = calculateDistance(userLocation[0], userLocation[1], eventLat, eventLng);
+        return { ...club, distance };
+    });
+
     const filteredClubs = activeFilter === 'All Clubs'
-        ? clubs
-        : clubs.filter(c => c.category === activeFilter);
+        ? clubsWithDistance
+        : activeFilter === 'Closest 5'
+            ? [...clubsWithDistance].sort((a, b) => (a.distance || 0) - (b.distance || 0)).slice(0, 5)
+            : clubsWithDistance.filter(c => c.category === activeFilter);
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
@@ -198,7 +253,9 @@ export function Feed({ user, activeFilter, setActiveFilter, onJoin }: FeedProps)
             {/* Create Event Form */}
             {showCreateForm && (
                 <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-8">
-                    <h2 className="text-xl font-bold text-gray-900 mb-4">Create a New Event</h2>
+                    <h2 className="text-xl font-bold text-gray-900 mb-4">
+                        Create a New Event {selectedLocation ? '(with map location)' : ''}
+                    </h2>
                     <form onSubmit={handleCreateEvent} className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <input
@@ -295,6 +352,24 @@ export function Feed({ user, activeFilter, setActiveFilter, onJoin }: FeedProps)
                         </button>
                     ))}
                 </div>
+
+                {/* View Mode Toggle */}
+                <div className="flex bg-gray-100 p-1 rounded-xl ml-auto">
+                    <button
+                        onClick={() => setViewMode('grid')}
+                        className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-white shadow-sm text-[#18452B]' : 'text-gray-500 hover:text-gray-900'}`}
+                        title="Grid View"
+                    >
+                        <GridIcon size={20} />
+                    </button>
+                    <button
+                        onClick={() => setViewMode('map')}
+                        className={`p-2 rounded-lg transition-colors ${viewMode === 'map' ? 'bg-white shadow-sm text-[#18452B]' : 'text-gray-500 hover:text-gray-900'}`}
+                        title="Map View"
+                    >
+                        <MapIcon size={20} />
+                    </button>
+                </div>
             </div>
 
             {/* Event Grid */}
@@ -309,6 +384,8 @@ export function Feed({ user, activeFilter, setActiveFilter, onJoin }: FeedProps)
                 </div>
             ) : filteredClubs.length === 0 ? (
                 <div className="bg-white border rounded-2xl p-12 text-center text-gray-500">No events found.</div>
+            ) : viewMode === 'map' ? (
+                <EventMap events={filteredClubs} onMapClick={handleMapClick} onEventClick={onJoin} userLocation={userLocation} />
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredClubs.map(club => (

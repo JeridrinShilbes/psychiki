@@ -1,4 +1,4 @@
-import { Users, Clock, ChevronRight, Trash2 } from 'lucide-react';
+import { Users, Clock, ChevronRight, Trash2, MapPin } from 'lucide-react';
 import type { Club } from '../types';
 import { CategoryBadge } from './CategoryBadge';
 
@@ -11,7 +11,7 @@ interface ClubCardProps {
 }
 
 export function ClubCard({ club, onJoin, currentUser, onDelete }: ClubCardProps) {
-    
+
     const isAuthor = currentUser === club.author;
 
     const handleDeleteClick = (e: React.MouseEvent) => {
@@ -23,8 +23,8 @@ export function ClubCard({ club, onJoin, currentUser, onDelete }: ClubCardProps)
     };
 
     return (
-        <div 
-            className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group cursor-pointer" 
+        <div
+            className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group cursor-pointer"
             onClick={onJoin}
         >
             <div className="relative h-48 overflow-hidden">
@@ -33,7 +33,7 @@ export function ClubCard({ club, onJoin, currentUser, onDelete }: ClubCardProps)
                     alt={club.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
-                
+
                 {/* Category Badge */}
                 <div className="absolute top-4 left-4">
                     <CategoryBadge category={club.category} />
@@ -62,7 +62,7 @@ export function ClubCard({ club, onJoin, currentUser, onDelete }: ClubCardProps)
                 <div className="flex justify-between items-start mb-2">
                     <h3 className="text-xl font-bold text-gray-900">{club.title}</h3>
                 </div>
-                
+
                 <p className="text-gray-500 text-sm line-clamp-2 mb-4 leading-relaxed">
                     {club.description}
                 </p>
@@ -90,11 +90,16 @@ export function ClubCard({ club, onJoin, currentUser, onDelete }: ClubCardProps)
                         <span className="flex items-center gap-1.5">
                             <Users size={14} /> {club.members}
                         </span>
-                        <span className="flex items-center gap-1.5">
+                        <span className="flex items-center gap-1.5 line-clamp-1 max-w-[80px]">
                             <Clock size={14} /> {club.schedule}
                         </span>
+                        {club.distance !== undefined && (
+                            <span className="flex items-center gap-1.5 text-[#18452B]">
+                                <MapPin size={14} /> {club.distance.toFixed(1)} km
+                            </span>
+                        )}
                     </div>
-                    <ChevronRight size={16} className="text-gray-300 group-hover:text-[#18452B] transition-colors" />
+                    <ChevronRight size={16} className="text-gray-300 flex-shrink-0 group-hover:text-[#18452B] transition-colors" />
                 </div>
             </div>
         </div>
