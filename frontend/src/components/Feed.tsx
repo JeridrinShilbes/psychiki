@@ -15,6 +15,8 @@ export function Feed({ user, activeFilter, setActiveFilter, onJoin }: FeedProps)
     const [clubs, setClubs] = useState<Club[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    // Default it to whichever department makes the most sense
+const [imageDepartment, setImageDepartment] = useState<string>('Burn Energy');
 
     // Create Event state
     const [showCreateForm, setShowCreateForm] = useState(false);
@@ -61,23 +63,48 @@ export function Feed({ user, activeFilter, setActiveFilter, onJoin }: FeedProps)
     }
 };
 
-    const handleCreateEvent = async (e: React.FormEvent) => {
+// 1. Define image pools for each category
+const IMAGES_BY_CATEGORY: Record<string, string[]> = {
+    'Cardio': [
+        'https://images.unsplash.com/photo-1517836357463-d25dfe09ce14?auto=format&fit=crop&q=80&w=600',
+        'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80&w=600',
+        'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&q=80&w=600'
+    ],
+    'Running': [
+        'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=600',
+        'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=600',
+        'https://images.unsplash.com/photo-1508672019048-805c876b67e2?auto=format&fit=crop&q=80&w=600'
+    ],
+    'Meditation': [
+        'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&q=80&w=600',
+        'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&q=80&w=600',
+        'https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&q=80&w=600'
+    ]
+};
+
+// 2. Update the handleCreateEvent function
+const handleCreateEvent = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newEventTitle.trim() || !newEventDescription.trim()) return;
 
     setIsPosting(true);
 
-    // We pull the name from the 'user' prop passed into Feed
+    // Get the pool for the specifically selected image department dropdown
+    const pool = IMAGES_BY_CATEGORY[imageDepartment] || IMAGES_BY_CATEGORY['Burn Energy'];
+    
+    // Select a random image from that specific pool
+    const randomImage = pool[Math.floor(Math.random() * pool.length)];
+
     const newEventData = {
         title: newEventTitle,
         description: newEventDescription,
-        category: newEventCategory,
+        category: newEventCategory, // Event category stays independent
         tags: newEventTags.split(',').map(tag => tag.trim()).filter(Boolean),
         schedule: newEventSchedule || 'TBD',
-        image: 'https://images.unsplash.com/photo-1517836357463-d25dfe09ce14?auto=format&fit=crop&q=80&w=600',
+        image: randomImage, // Assign the random department-specific image
         members: 1,
         matchScore: 100,
-        author: user.name // IMPORTANT: Send the name from your user profile
+        author: user.name 
     };
 
     try {
@@ -98,7 +125,8 @@ export function Feed({ user, activeFilter, setActiveFilter, onJoin }: FeedProps)
 
             setClubs(prevClubs => [formattedEvent, ...prevClubs]);
             resetForm();
-}
+            // Optional: reset imageDepartment to default here if needed
+        }
     } catch (err) {
         console.error("Error posting event:", err);
         alert("Failed to post event. Please check if the Render backend is awake!");
@@ -142,100 +170,115 @@ export function Feed({ user, activeFilter, setActiveFilter, onJoin }: FeedProps)
             {/* Create Event Form */}
             {showCreateForm && (
                 <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-8">
-                    <h2 className="text-xl font-bold text-gray-900 mb-4">Create a New Event</h2>
-                    <form onSubmit={handleCreateEvent} className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                                <input
-                                    type="text"
-                                    value={newEventTitle}
-                                    onChange={(e) => setNewEventTitle(e.target.value)}
-                                    placeholder="e.g., Weekend Hike"
-                                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
-                                    required
-                                    disabled={isPosting}
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                                <select
-                                    value={newEventCategory}
-                                    onChange={(e) => setNewEventCategory(e.target.value)}
-                                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
-                                    disabled={isPosting}
-                                >
-                                    <option value="Burn Energy">Burn Energy</option>
-                                    <option value="Clear Head">Clear Head</option>
-                                    <option value="Find People">Find People</option>
-                                </select>
-                            </div>
-                        </div>
-
+                <h2 className="text-xl font-bold text-gray-900 mb-4">Create a New Event</h2>
+                <form onSubmit={handleCreateEvent} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                            <textarea
-                                value={newEventDescription}
-                                onChange={(e) => setNewEventDescription(e.target.value)}
-                                placeholder="What is this event about?"
-                                rows={3}
-                                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none resize-none"
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                            <input
+                                type="text"
+                                value={newEventTitle}
+                                onChange={(e) => setNewEventTitle(e.target.value)}
+                                placeholder="e.g., Weekend Hike"
+                                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                                 required
                                 disabled={isPosting}
                             />
                         </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Tags (comma separated)</label>
-                                <input
-                                    type="text"
-                                    value={newEventTags}
-                                    onChange={(e) => setNewEventTags(e.target.value)}
-                                    placeholder="e.g., #Hiking, #Outdoors"
-                                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
-                                    disabled={isPosting}
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Schedule</label>
-                                <input
-                                    type="text"
-                                    value={newEventSchedule}
-                                    onChange={(e) => setNewEventSchedule(e.target.value)}
-                                    placeholder="e.g., Saturday at 10 AM"
-                                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
-                                    disabled={isPosting}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="flex items-center justify-end gap-3 pt-4">
-                            <button
-                                type="button"
-                                onClick={resetForm}
-                                className="px-4 py-2 text-gray-600 font-medium hover:text-gray-900 transition-colors"
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                            <select
+                                value={newEventCategory}
+                                onChange={(e) => setNewEventCategory(e.target.value)}
+                                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                                 disabled={isPosting}
                             >
-                                Cancel
-                            </button>
-                            <button
-                                type="submit"
-                                disabled={isPosting || !newEventTitle.trim() || !newEventDescription.trim()}
-                                className="inline-flex items-center px-6 py-2 bg-[#18452B] text-white font-medium rounded-xl hover:bg-[#123620] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-                            >
-                                {isPosting ? (
-                                    <>
-                                        <Loader2 size={18} className="animate-spin mr-2" />
-                                        Creating...
-                                    </>
-                                ) : (
-                                    'Create Event'
-                                )}
-                            </button>
+                                <option value="Burn Energy">Burn Energy</option>
+                                <option value="Clear Head">Clear Head</option>
+                                <option value="Find People">Find People</option>
+                            </select>
                         </div>
-                    </form>
-                </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <textarea
+                            value={newEventDescription}
+                            onChange={(e) => setNewEventDescription(e.target.value)}
+                            placeholder="What is this event about?"
+                            rows={3}
+                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none resize-none"
+                            required
+                            disabled={isPosting}
+                        />
+                    </div>
+
+                    {/* Updated Grid: Now contains Tags, Schedule, and Image Department */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Tags (comma separated)</label>
+                            <input
+                                type="text"
+                                value={newEventTags}
+                                onChange={(e) => setNewEventTags(e.target.value)}
+                                placeholder="e.g., #Hiking, #Outdoors"
+                                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                                disabled={isPosting}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Schedule</label>
+                            <input
+                                type="text"
+                                value={newEventSchedule}
+                                onChange={(e) => setNewEventSchedule(e.target.value)}
+                                placeholder="e.g., Saturday at 10 AM"
+                                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                                disabled={isPosting}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Activity Type</label>
+                            <select
+                                value={imageDepartment}
+                                onChange={(e) => setImageDepartment(e.target.value)}
+                                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                                disabled={isPosting}
+                            >
+                                {/* Make sure these values map exactly to the keys in your IMAGES_BY_CATEGORY object */}
+                                <option value="Cardio">Cardio</option>
+                                <option value="Running">Running</option>
+                                <option value="Meditation">Meditation</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-3 pt-4">
+                        <button
+                            type="button"
+                            onClick={resetForm}
+                            className="px-4 py-2 text-gray-600 font-medium hover:text-gray-900 transition-colors"
+                            disabled={isPosting}
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={isPosting || !newEventTitle.trim() || !newEventDescription.trim()}
+                            className="inline-flex items-center px-6 py-2 bg-[#18452B] text-white font-medium rounded-xl hover:bg-[#123620] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                        >
+                            {isPosting ? (
+                                <>
+                                    <Loader2 size={18} className="animate-spin mr-2" />
+                                    Creating...
+                                </>
+                            ) : (
+                                'Create Event'
+                            )}
+                        </button>
+                    </div>
+                </form>
+            </div>
             )}
 
             <div className="flex flex-col sm:flex-row gap-4 items-center">
