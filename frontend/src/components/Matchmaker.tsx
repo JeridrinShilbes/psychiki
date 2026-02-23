@@ -53,7 +53,6 @@ Based on the user's feelings and goals, generate exactly 3 clubs.`;
 
             const url =
 `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-console.log(apiKey);
             const payload = {
                 contents: [
                     {
