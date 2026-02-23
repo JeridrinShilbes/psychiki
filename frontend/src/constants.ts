@@ -1,4 +1,4 @@
-import type { Club } from './types';
+
 
 // Gemini API Key will be injected by the environment
 export const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
