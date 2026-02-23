@@ -135,6 +135,8 @@ export function Feed({ user, activeFilter, setActiveFilter, onJoin }: FeedProps)
     };
 
     const handleDeleteEvent = async (eventId: string, authorName: string) => {
+        console.log(user.name);
+        console.log(authorName);
         if (user.name !== authorName) {
             alert("Unauthorized.");
             return;
@@ -145,7 +147,7 @@ export function Feed({ user, activeFilter, setActiveFilter, onJoin }: FeedProps)
         try {
             const response = await fetch(`${EVENTS_API}/${eventId}`, {
                 method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json','x-user-name':user.name },
                 body: JSON.stringify({ userName: user.name })
             });
 
@@ -163,7 +165,7 @@ export function Feed({ user, activeFilter, setActiveFilter, onJoin }: FeedProps)
     const resetForm = () => {
         setNewEventTitle('');
         setNewEventDescription('');
-        setNewEventCategory('Burn Energy');
+        setNewEventCategory('Cardio');
         setNewEventTags('');
         setNewEventSchedule('');
         setShowCreateForm(false);
