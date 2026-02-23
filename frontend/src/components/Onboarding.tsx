@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Activity, Flame, Wind, HeartHandshake, ArrowRight } from 'lucide-react';
+import { Flame, Wind, HeartHandshake, ArrowRight } from 'lucide-react';
 
 interface OnboardingProps {
     onComplete: (focus: string) => void;
@@ -43,7 +43,7 @@ export function Onboarding({ onComplete, onSignOut }: OnboardingProps) {
         <div className="min-h-screen bg-[#FAFAFA] flex flex-col relative font-sans">
             <header className="absolute top-0 w-full p-6 flex justify-between items-center z-10">
                 <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-2 cursor-pointer" onClick={() => setCurrentView('feed')}>
+                    <div className="flex items-center gap-2">
                         {/* This is the raw SVG code for a thin, minimalistic temple */}
                         <svg
                             viewBox="0 0 100 100"
