@@ -18,12 +18,12 @@ import {
 } from 'lucide-react';
 
 // --- Types & Interfaces ---
-interface UserProfile {
-  name: string;
-  email: string;
-  primaryFocus: string | null;
-  interests: string[];
-}
+// interface UserProfile {
+//   name: string;
+//   email: string;
+//   primaryFocus: string | null;
+//   interests: string[];
+// }
 
 interface Club {
   id: number;
