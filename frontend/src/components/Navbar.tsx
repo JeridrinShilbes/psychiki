@@ -22,7 +22,7 @@ export function Navbar({ currentView, setCurrentView, userName, onLogout }: Navb
                         <div className="bg-[#18452B] text-white p-1.5 rounded-md">
                             <Activity size={20} strokeWidth={3} />
                         </div>
-                        <span className="font-bold text-xl tracking-tight text-gray-900">MicroClub</span>
+                        <span className="font-bold text-xl tracking-tight text-gray-900">Psychiki</span>
                     </div>
 
                     <div className="hidden sm:flex items-center space-x-8">
