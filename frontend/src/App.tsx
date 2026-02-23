@@ -40,13 +40,6 @@ interface Club {
 // --- Configuration & Constants ---
 const apiKey = ""; // Gemini API Key will be injected by the environment
 
-const MOCK_USER: UserProfile = {
-  name: 'eta',
-  email: 'raohemonish@gmail.com',
-  primaryFocus: null, // Starts null to demonstrate onboarding
-  interests: ['#GymAnxiety', '#PostWorkDecompression', '#RunnerLife']
-};
-
 const ALL_TAGS: string[] = [
   '#GymAnxiety', '#Endurance', '#NeedToVent', '#MeditationNewbie',
   '#PostWorkDecompression', '#MorningPerson', '#NightOwl', '#HIIT', '#Yoga',
@@ -394,8 +387,8 @@ function Navbar({ currentView, setCurrentView, userName, onLogout }: NavbarProps
                 key={item.id}
                 onClick={() => setCurrentView(item.id)}
                 className={`flex items-center gap-2 text-sm font-medium transition-colors ${currentView === item.id
-                    ? 'text-[#18452B]'
-                    : 'text-gray-500 hover:text-gray-900'
+                  ? 'text-[#18452B]'
+                  : 'text-gray-500 hover:text-gray-900'
                   }`}
               >
                 <item.icon size={18} className={currentView === item.id ? 'text-[#18452B]' : 'text-gray-400'} />
@@ -572,8 +565,8 @@ function Feed({ user, clubs, activeFilter, setActiveFilter, onJoin }: FeedProps)
               key={filter}
               onClick={() => setActiveFilter(filter)}
               className={`whitespace-nowrap px-5 py-2.5 rounded-full text-sm font-semibold transition-colors ${activeFilter === filter
-                  ? 'bg-[#18452B] text-white shadow-md'
-                  : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                ? 'bg-[#18452B] text-white shadow-md'
+                : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
                 }`}
             >
               {filter}
@@ -695,8 +688,8 @@ function RsvpModal({ club, onClose }: RsvpModalProps) {
                     key={intent.id}
                     onClick={() => setSelectedIntent(intent.id)}
                     className={`w-full flex items-center p-4 rounded-2xl border-2 text-left transition-all ${selectedIntent === intent.id
-                        ? 'border-[#18452B] bg-[#18452B]/5'
-                        : 'border-gray-100 hover:border-gray-200 bg-white'
+                      ? 'border-[#18452B] bg-[#18452B]/5'
+                      : 'border-gray-100 hover:border-gray-200 bg-white'
                       }`}
                   >
                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mr-4 ${selectedIntent === intent.id ? 'border-[#18452B]' : 'border-gray-300'
@@ -975,8 +968,8 @@ function Profile({ user, setUser }: ProfileProps) {
                 key={tag}
                 onClick={() => toggleTag(tag)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border ${isSelected
-                    ? 'bg-[#18452B] text-white border-[#18452B] shadow-md shadow-green-900/10 scale-105'
-                    : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                  ? 'bg-[#18452B] text-white border-[#18452B] shadow-md shadow-green-900/10 scale-105'
+                  : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                   }`}
               >
                 {tag}
