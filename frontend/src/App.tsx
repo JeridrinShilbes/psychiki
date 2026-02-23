@@ -155,27 +155,11 @@ export default function App() {
     setCurrentView('feed');
   };
 
-  // Auth Screen Flow
-  if (!user) {
-    return <AuthScreen onLogin={(userData) => setUser(userData)} />;
-  }
-
-  // Onboarding Flow
-  if (!user.primaryFocus) {
-    return (
-      <Onboarding
-        onComplete={(focus) => setUser({ ...user, primaryFocus: focus })}
-        onSignOut={handleLogout}
-      />
-    );
-  }
-
-  // Main App Flow
   const renderView = () => {
     switch (currentView) {
       case 'feed':
         return <Feed
-          user={user}
+          user={user as UserProfile}
           clubs={clubs}
           activeFilter={activeFilter}
           setActiveFilter={setActiveFilter}
@@ -187,28 +171,56 @@ export default function App() {
           setCurrentView('feed');
         }} />;
       case 'profile':
-        return <Profile user={user} setUser={setUser} />;
+        return <Profile user={user as UserProfile} setUser={setUser} />;
       default:
-        return <Feed user={user} clubs={clubs} activeFilter={activeFilter} setActiveFilter={setActiveFilter} onJoin={(club) => setRsvpModal({ isOpen: true, club })} />;
+        return <Feed user={user as UserProfile} clubs={clubs} activeFilter={activeFilter} setActiveFilter={setActiveFilter} onJoin={(club) => setRsvpModal({ isOpen: true, club })} />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] text-gray-900 font-sans selection:bg-green-200">
-      <Navbar currentView={currentView} setCurrentView={setCurrentView} userName={user.name} onLogout={handleLogout} />
+    <>
+      {/* GLOBAL OVERRIDE: This style block prevents Vite's default CSS from squishing the app */}
+      <style>{`
+        #root {
+          max-width: none !important;
+          padding: 0 !important;
+          margin: 0 !important;
+          width: 100% !important;
+          text-align: left !important;
+        }
+        body {
+          margin: 0 !important;
+          display: block !important;
+          background-color: #FAFAFA !important;
+        }
+      `}</style>
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {renderView()}
-      </main>
-
-      {/* Pre-RSVP Intent Modal */}
-      {rsvpModal.isOpen && rsvpModal.club && (
-        <RsvpModal
-          club={rsvpModal.club}
-          onClose={() => setRsvpModal({ isOpen: false, club: null })}
+      {/* App Routing Flow */}
+      {!user ? (
+        <AuthScreen onLogin={(userData) => setUser(userData)} />
+      ) : !user.primaryFocus ? (
+        <Onboarding
+          onComplete={(focus) => setUser({ ...user, primaryFocus: focus })}
+          onSignOut={handleLogout}
         />
+      ) : (
+        <div className="min-h-screen bg-[#FAFAFA] text-gray-900 font-sans selection:bg-green-200">
+          <Navbar currentView={currentView} setCurrentView={setCurrentView} userName={user.name} onLogout={handleLogout} />
+
+          <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {renderView()}
+          </main>
+
+          {/* Pre-RSVP Intent Modal */}
+          {rsvpModal.isOpen && rsvpModal.club && (
+            <RsvpModal
+              club={rsvpModal.club}
+              onClose={() => setRsvpModal({ isOpen: false, club: null })}
+            />
+          )}
+        </div>
       )}
-    </div>
+    </>
   );
 }
 
