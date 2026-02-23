@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { UserProfile, Club } from './types';
 import { Navbar } from './components/Navbar';
 import { Onboarding } from './components/Onboarding';
@@ -12,12 +12,31 @@ import { Noticeboard } from './components/Noticeboard';
 export default function App() {
   // Directly bypass the AuthScreen by initialising with a mock user.
   // In a real application, you'd check authentication status here.
-  const [user, setUser] = useState<UserProfile | null>({
-    name: 'Jeridrin',
-    email: 'user@example.com',
-    primaryFocus: null, // Always starts null to demonstrate onboarding
-    interests: []
+  const [user, setUser] = useState<UserProfile | null>(() => {
+    const savedUser = localStorage.getItem('psychiki_user');
+    if (savedUser) {
+      try {
+        return JSON.parse(savedUser);
+      } catch (e) {
+        console.error('Failed to parse user from local storage', e);
+      }
+    }
+    return {
+      name: 'Jeridrin',
+      email: 'user@example.com',
+      primaryFocus: null, // Always starts null to demonstrate onboarding
+      interests: []
+    };
   });
+
+  // Persist user to localStorage whenever it changes
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('psychiki_user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('psychiki_user');
+    }
+  }, [user]);
 
   const [currentView, setCurrentView] = useState<string>('feed'); // feed, matchmaker, profile
   const [activeFilter, setActiveFilter] = useState<string>('All Clubs');
