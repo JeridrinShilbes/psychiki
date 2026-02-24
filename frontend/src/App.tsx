@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import type { UserProfile, Club } from './types';
 import { Navbar } from './components/Navbar';
 import { Onboarding } from './components/Onboarding';
@@ -103,12 +104,14 @@ export default function App() {
       </main>
 
       {/* Pre-RSVP Intent Modal */}
-      {rsvpModal.isOpen && rsvpModal.club && (
-        <RsvpModal
-          club={rsvpModal.club}
-          onClose={() => setRsvpModal({ isOpen: false, club: null })}
-        />
-      )}
+      <AnimatePresence>
+        {rsvpModal.isOpen && rsvpModal.club && (
+          <RsvpModal
+            club={rsvpModal.club}
+            onClose={() => setRsvpModal({ isOpen: false, club: null })}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

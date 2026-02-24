@@ -1,4 +1,5 @@
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
+import { motion } from 'framer-motion';
 import L from 'leaflet';
 import type { Club } from '../types';
 
@@ -18,6 +19,7 @@ interface EventMapProps {
     onMapClick: (lat: number, lng: number) => void;
     onEventClick: (event: Club) => void;
     userLocation: [number, number] | null;
+    selectedLocation?: { lat: number, lng: number } | null;
 }
 
 function MapClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number) => void }) {
@@ -29,7 +31,7 @@ function MapClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number
     return null;
 }
 
-export function EventMap({ events, onMapClick, onEventClick, userLocation }: EventMapProps) {
+export function EventMap({ events, onMapClick, onEventClick, userLocation, selectedLocation }: EventMapProps) {
     // Default center as fallback, but we will try to get the user's location
     const center = userLocation || [51.505, -0.09];
 
@@ -76,6 +78,21 @@ export function EventMap({ events, onMapClick, onEventClick, userLocation }: Eve
                     </Popup>
                 </Marker>
 
+                {/* Temporary New Event Marker */}
+                {selectedLocation && (
+                    <Marker
+                        position={[selectedLocation.lat, selectedLocation.lng]}
+                        icon={createCustomIcon('https://cdn-icons-png.flaticon.com/512/1828/1828817.png')} // Green plus or distinct icon
+                    >
+                        <Popup className="custom-popup">
+                            <div className="p-3 text-center bg-white h-full">
+                                <div className="font-bold text-gray-900 text-sm">📍 New Event Location</div>
+                                <div className="text-xs text-gray-500 mt-1">Fill out the form to post here.</div>
+                            </div>
+                        </Popup>
+                    </Marker>
+                )}
+
                 {events.map((event) => {
                     const position = getEventPosition(event);
                     return (
@@ -95,15 +112,17 @@ export function EventMap({ events, onMapClick, onEventClick, userLocation }: Eve
                                         {event.distance !== undefined && (
                                             <p className="text-xs font-semibold tracking-wide text-gray-500 mb-4">{event.distance.toFixed(1)} km away</p>
                                         )}
-                                        <button
+                                        <motion.button
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 onEventClick(event);
                                             }}
-                                            className="w-full py-2.5 bg-[#18452B] text-white text-sm font-bold rounded-xl hover:bg-[#123620] transition-colors shadow-sm"
+                                            className="w-full py-2.5 bg-[#18452B] text-white text-sm font-bold rounded-xl hover:bg-[#123620] shadow-sm flex items-center justify-center my-1"
                                         >
                                             Join Event
-                                        </button>
+                                        </motion.button>
                                     </div>
                                 </div>
                             </Popup>
