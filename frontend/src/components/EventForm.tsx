@@ -168,7 +168,6 @@ export function EventForm({ userName, selectedLocation, onSuccess, onCancel }: E
                         <option value="Swimming">Swimming</option>
                         <option value="Cycling">Cycling</option>
                         <option value="Pilates">Pilates</option>
-                        <option value="Martial Arts">Martial Arts</option>
                         <option value="Sports">Sports</option>
                         <option value="Other">Other</option>
                     </select>

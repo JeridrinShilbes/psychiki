@@ -191,7 +191,7 @@ Based on the user's feelings and goals, generate exactly 3 clubs.`;
                 <button
                     onClick={generateClubs}
                     disabled={isGenerating}
-                    className="w-full py-4 rounded-2xl font-bold text-white bg-[#18452B] hover:bg-[#113320] transition-colors shadow-lg shadow-green-900/20 flex items-center justify-center gap-2 disabled:opacity-70"
+                    className="w-full py-4 rounded-2xl font-bold text-white bg-gradient-to-r from-gray-900 to-black hover:from-black hover:to-gray-900 transition-colors shadow-lg flex items-center justify-center gap-2 disabled:opacity-70"
                 >
                     {isGenerating ? (
                         <>

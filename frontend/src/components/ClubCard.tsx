@@ -9,9 +9,10 @@ interface ClubCardProps {
     // Added props for deletion logic
     currentUser?: string;
     onDelete?: (id: string, author: string) => void;
+    hasJoined?: boolean;
 }
 
-export function ClubCard({ club, onJoin, currentUser, onDelete }: ClubCardProps) {
+export function ClubCard({ club, onJoin, currentUser, onDelete, hasJoined }: ClubCardProps) {
     const isAuthor = currentUser === club.author;
 
     const handleDeleteClick = (e: React.MouseEvent) => {
@@ -53,9 +54,16 @@ export function ClubCard({ club, onJoin, currentUser, onDelete }: ClubCardProps)
                 )}
 
                 {/* Match Score Badge - Only shows if not the author (to save space) */}
-                {!isAuthor && club.matchScore > 80 && (
+                {!isAuthor && club.matchScore > 80 && !hasJoined && (
                     <div className="absolute top-3 right-3 bg-black/80 backdrop-blur-md text-white border border-white/20 text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">
                         Match
+                    </div>
+                )}
+
+                {/* Joined Badge */}
+                {hasJoined && (
+                    <div className="absolute top-3 right-3 bg-[#18452B] backdrop-blur-md text-white border border-white/20 text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">
+                        Joined
                     </div>
                 )}
             </div>

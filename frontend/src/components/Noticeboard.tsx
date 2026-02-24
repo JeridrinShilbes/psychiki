@@ -133,7 +133,7 @@ export function Noticeboard({ userName }: { userName: string }) {
                 {!showPostForm && (
                     <button
                         onClick={() => setShowPostForm(true)}
-                        className="inline-flex items-center justify-center px-4 py-2.5 bg-[#18452B] text-white font-medium rounded-xl hover:bg-[#123620] transition-colors shadow-sm self-start sm:self-auto"
+                        className="inline-flex items-center justify-center px-4 py-2.5 bg-gradient-to-r from-gray-900 to-black text-white font-medium rounded-xl hover:from-black hover:to-gray-900 transition-colors shadow-sm self-start sm:self-auto"
                     >
                         <Plus size={20} className="mr-2" />
                         Post a Notice
@@ -184,7 +184,7 @@ export function Noticeboard({ userName }: { userName: string }) {
                             <button
                                 type="submit"
                                 disabled={isPosting || !newTitle.trim() || !newContent.trim()}
-                                className="inline-flex items-center px-6 py-2 bg-[#18452B] text-white font-medium rounded-xl hover:bg-[#123620] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                                className="inline-flex items-center px-6 py-2 bg-gradient-to-r from-gray-900 to-black text-white font-medium rounded-xl hover:from-black hover:to-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                             >
                                 {isPosting ? (
                                     <>

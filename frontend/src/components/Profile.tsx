@@ -52,7 +52,7 @@ export function Profile({ user, setUser }: ProfileProps) {
             {/* User Info Card */}
             <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-6">
                 {/* Dynamic Avatar based on localName so it updates as you type */}
-                <div className="w-20 h-20 shrink-0 bg-[#18452B] text-white rounded-2xl flex items-center justify-center text-3xl font-bold shadow-inner">
+                <div className="w-20 h-20 shrink-0 bg-gray-900 text-white rounded-2xl flex items-center justify-center text-3xl font-bold shadow-inner border border-gray-800">
                     {(localName || 'U').charAt(0).toUpperCase()}
                 </div>
 
@@ -63,7 +63,7 @@ export function Profile({ user, setUser }: ProfileProps) {
                                 type="text"
                                 value={localName}
                                 onChange={(e) => setLocalName(e.target.value)}
-                                className="text-xl font-bold text-gray-900 border-b-2 border-[#18452B] focus:outline-none bg-gray-50 px-2 py-1 rounded-t-md w-full max-w-[250px]"
+                                className="text-xl font-bold text-gray-900 border-b-2 border-gray-900 focus:outline-none bg-gray-50 px-2 py-1 rounded-t-md w-full max-w-[250px]"
                                 autoFocus
                                 onKeyDown={(e) => e.key === 'Enter' && toggleEditName()}
                             />
@@ -74,7 +74,7 @@ export function Profile({ user, setUser }: ProfileProps) {
                         {/* Edit Name Button */}
                         <button
                             onClick={toggleEditName}
-                            className="p-1.5 text-gray-400 hover:text-[#18452B] hover:bg-green-50 rounded-md transition-colors"
+                            className="p-1.5 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
                             title={isEditingName ? "Done editing" : "Edit name"}
                         >
                             <Pencil size={16} />
@@ -102,7 +102,7 @@ export function Profile({ user, setUser }: ProfileProps) {
                         <h3 className="text-xl font-bold text-gray-900">Micro-Interests</h3>
                         <p className="text-gray-500 text-sm mt-1">Select up to 3 tags that resonate with you. These shape your club recommendations.</p>
                     </div>
-                    <div className={`text-sm font-medium ${localInterests.length === 3 ? 'text-[#18452B]' : 'text-gray-400'}`}>
+                    <div className={`text-sm font-medium ${localInterests.length === 3 ? 'text-gray-900' : 'text-gray-400'}`}>
                         {localInterests.length} / 3 selected
                     </div>
                 </div>
@@ -118,7 +118,7 @@ export function Profile({ user, setUser }: ProfileProps) {
                                 onClick={() => toggleTag(tag)}
                                 disabled={isDisabled}
                                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border ${isSelected
-                                    ? 'bg-[#18452B] text-white border-[#18452B] shadow-md shadow-green-900/10 scale-105'
+                                    ? 'bg-gray-900 text-white border-gray-900 shadow-md shadow-gray-900/10 scale-105'
                                     : isDisabled
                                         ? 'bg-gray-50 text-gray-400 border-gray-100 cursor-not-allowed opacity-60'
                                         : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50'
@@ -134,7 +134,7 @@ export function Profile({ user, setUser }: ProfileProps) {
                 <div className="pt-6 border-t border-gray-100">
                     <button
                         onClick={handleSave}
-                        className="px-6 py-3 rounded-xl font-bold text-white bg-[#18452B] hover:bg-[#113320] transition-colors shadow-lg shadow-green-900/20"
+                        className="px-6 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-gray-900 to-black hover:from-black hover:to-gray-900 transition-colors shadow-lg shadow-gray-900/20"
                     >
                         Save Changes
                     </button>

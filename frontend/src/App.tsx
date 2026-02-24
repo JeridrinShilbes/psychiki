@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
-import { AnimatePresence } from 'framer-motion';
-import type { UserProfile, Club } from './types';
+import type { UserProfile } from './types';
 import { Navbar } from './components/Navbar';
 import { Onboarding } from './components/Onboarding';
 import { Feed } from './components/Feed';
 import { Matchmaker } from './components/Matchmaker';
 import { Profile } from './components/Profile';
-import { RsvpModal } from './components/RsvpModal';
 import { Noticeboard } from './components/Noticeboard';
 
 // --- Main App Component ---
@@ -26,7 +24,8 @@ export default function App() {
       name: 'Jeridrin',
       email: 'user@example.com',
       primaryFocus: null, // Always starts null to demonstrate onboarding
-      interests: []
+      interests: [],
+      joinedEvents: []
     };
   });
 
@@ -41,7 +40,6 @@ export default function App() {
 
   const [currentView, setCurrentView] = useState<string>('feed'); // feed, matchmaker, profile
   const [activeFilter, setActiveFilter] = useState<string>('All Clubs');
-  const [rsvpModal, setRsvpModal] = useState<{ isOpen: boolean; club: Club | null }>({ isOpen: false, club: null });
 
   const handleLogout = () => {
     // In this mocked environment without a login screen, we simply re-initialize the user 
@@ -50,7 +48,8 @@ export default function App() {
       name: 'Jeridrin',
       email: 'user@example.com',
       primaryFocus: null,
-      interests: []
+      interests: [],
+      joinedEvents: []
     });
     setCurrentView('feed');
   };
@@ -78,9 +77,9 @@ export default function App() {
       case 'feed':
         return <Feed
           user={user}
+          setUser={setUser}
           activeFilter={activeFilter}
           setActiveFilter={setActiveFilter}
-          onJoin={(club) => setRsvpModal({ isOpen: true, club })}
         />;
       case 'matchmaker':
         return <Matchmaker onMatchmakerComplete={() => {
@@ -91,7 +90,7 @@ export default function App() {
       case 'noticeboard':
         return <Noticeboard userName={user.name} />;
       default:
-        return <Feed user={user} activeFilter={activeFilter} setActiveFilter={setActiveFilter} onJoin={(club) => setRsvpModal({ isOpen: true, club })} />;
+        return <Feed user={user} setUser={setUser} activeFilter={activeFilter} setActiveFilter={setActiveFilter} />;
     }
   };
 
@@ -103,15 +102,7 @@ export default function App() {
         {renderView()}
       </main>
 
-      {/* Pre-RSVP Intent Modal */}
-      <AnimatePresence>
-        {rsvpModal.isOpen && rsvpModal.club && (
-          <RsvpModal
-            club={rsvpModal.club}
-            onClose={() => setRsvpModal({ isOpen: false, club: null })}
-          />
-        )}
-      </AnimatePresence>
+
     </div>
   );
 }

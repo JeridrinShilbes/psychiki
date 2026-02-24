@@ -1,5 +1,5 @@
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
-import { motion } from 'framer-motion';
+
 import L from 'leaflet';
 import type { Club } from '../types';
 
@@ -20,6 +20,7 @@ interface EventMapProps {
     onEventClick: (event: Club) => void;
     userLocation: [number, number] | null;
     selectedLocation?: { lat: number, lng: number } | null;
+    hasJoined?: (id: string) => boolean;
 }
 
 function MapClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number) => void }) {
@@ -31,7 +32,7 @@ function MapClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number
     return null;
 }
 
-export function EventMap({ events, onMapClick, onEventClick, userLocation, selectedLocation }: EventMapProps) {
+export function EventMap({ events, onMapClick, onEventClick, userLocation, selectedLocation, hasJoined }: EventMapProps) {
     // Default center as fallback, but we will try to get the user's location
     const center = userLocation || [51.505, -0.09];
 
@@ -112,17 +113,19 @@ export function EventMap({ events, onMapClick, onEventClick, userLocation, selec
                                         {event.distance !== undefined && (
                                             <p className="text-xs font-semibold tracking-wide text-gray-500 mb-4">{event.distance.toFixed(1)} km away</p>
                                         )}
-                                        <motion.button
-                                            whileHover={{ scale: 1.05 }}
-                                            whileTap={{ scale: 0.95 }}
+                                        <button
+                                            disabled={hasJoined && hasJoined(event.id)}
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 onEventClick(event);
                                             }}
-                                            className="w-full py-2.5 bg-[#18452B] text-white text-sm font-bold rounded-xl hover:bg-[#123620] shadow-sm flex items-center justify-center my-1"
+                                            className={`w-full py-2.5 text-white text-sm font-bold rounded-xl shadow-sm flex items-center justify-center my-1
+                                                ${hasJoined && hasJoined(event.id)
+                                                    ? 'bg-gray-400 cursor-not-allowed opacity-80'
+                                                    : 'bg-gradient-to-r from-gray-900 to-black hover:from-black hover:to-gray-900'}`}
                                         >
-                                            Join Event
-                                        </motion.button>
+                                            {hasJoined && hasJoined(event.id) ? 'Already Joined' : 'Join Event'}
+                                        </button>
                                     </div>
                                 </div>
                             </Popup>

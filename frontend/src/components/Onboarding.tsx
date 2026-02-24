@@ -114,7 +114,7 @@ export function Onboarding({ onComplete, onSignOut }: OnboardingProps) {
                         disabled={!selectedFocus}
                         className="px-10 py-4 rounded-full font-bold text-lg flex items-center gap-2 transition-all duration-300
               disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed
-              bg-[#18452B] text-white hover:bg-[#113320] shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+              bg-gradient-to-r from-gray-900 to-black text-white hover:from-black hover:to-gray-900 shadow-lg hover:shadow-xl hover:-translate-y-0.5"
                     >
                         Continue <ArrowRight size={20} />
                     </button>

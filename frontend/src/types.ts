@@ -3,6 +3,7 @@ export interface UserProfile {
     email: string;
     primaryFocus: string | null;
     interests: string[];
+    joinedEvents: string[];
 }
 
 export interface Club {

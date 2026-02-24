@@ -8,16 +8,17 @@ import { EVENTS_API } from '../constants';
 import { BentoHero } from './BentoHero';
 import { EventForm } from './EventForm';
 import { FilterBar } from './FilterBar';
+import { RsvpModal } from './RsvpModal';
 
 interface FeedProps {
     user: UserProfile;
+    setUser: (user: UserProfile) => void;
     activeFilter: string;
     setActiveFilter: (filter: string) => void;
-    onJoin: (club: Club) => void;
 }
 
 
-export function Feed({ user, activeFilter, setActiveFilter, onJoin }: FeedProps) {
+export function Feed({ user, setUser, activeFilter, setActiveFilter }: FeedProps) {
     const [clubs, setClubs] = useState<Club[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -28,6 +29,7 @@ export function Feed({ user, activeFilter, setActiveFilter, onJoin }: FeedProps)
     // Form States
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [selectedLocation, setSelectedLocation] = useState<{ lat: number, lng: number } | null>(null);
+    const [rsvpModal, setRsvpModal] = useState<{ isOpen: boolean; club: Club | null }>({ isOpen: false, club: null });
 
     const filters = ['All Clubs', 'Burn Energy', 'Clear Head', 'Find People'];
 
@@ -213,9 +215,10 @@ export function Feed({ user, activeFilter, setActiveFilter, onJoin }: FeedProps)
                         <EventMap
                             events={filteredClubs}
                             onMapClick={handleMapClick}
-                            onEventClick={onJoin}
+                            onEventClick={(club) => setRsvpModal({ isOpen: true, club })}
                             userLocation={userLocation}
                             selectedLocation={selectedLocation}
+                            hasJoined={(id) => !!user.joinedEvents?.includes(id)}
                         />
                     </div>
                 ) : (
@@ -229,15 +232,32 @@ export function Feed({ user, activeFilter, setActiveFilter, onJoin }: FeedProps)
                             <motion.div variants={itemVariants} key={club.id}>
                                 <ClubCard
                                     club={club}
-                                    onJoin={() => onJoin(club)}
+                                    onJoin={() => setRsvpModal({ isOpen: true, club })}
                                     currentUser={user.name}
                                     onDelete={handleDeleteEvent}
+                                    hasJoined={user.joinedEvents?.includes(club.id)}
                                 />
                             </motion.div>
                         ))}
                     </motion.div>
                 )}
             </motion.div>
+
+            {/* Pre-RSVP Intent Modal */}
+            <AnimatePresence>
+                {rsvpModal.isOpen && rsvpModal.club && (
+                    <RsvpModal
+                        club={rsvpModal.club}
+                        onClose={() => setRsvpModal({ isOpen: false, club: null })}
+                        hasJoined={user.joinedEvents?.includes(rsvpModal.club.id)}
+                        onJoinSuccess={(clubId) => {
+                            setClubs(prev => prev.map(c => c.id === clubId ? { ...c, members: c.members + 1 } : c));
+                            setUser({ ...user, joinedEvents: [...(user.joinedEvents || []), clubId] });
+                            setRsvpModal({ isOpen: false, club: null });
+                        }}
+                    />
+                )}
+            </AnimatePresence>
         </motion.div>
     );
 }

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { X, Users, Clock, Tag } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Club } from '../types';
@@ -5,9 +6,33 @@ import type { Club } from '../types';
 interface EventModalProps {
     club: Club;
     onClose: () => void;
+    hasJoined?: boolean;
+    onJoinSuccess?: (clubId: string) => void;
 }
+import { EVENTS_API } from '../constants';
 
-export function RsvpModal({ club, onClose }: EventModalProps) {
+export function RsvpModal({ club, onClose, hasJoined, onJoinSuccess }: EventModalProps) {
+    const [isJoining, setIsJoining] = useState(false);
+
+    const handleJoin = async () => {
+        setIsJoining(true);
+        try {
+            // Updated to be a generic POST endpoint /join
+            await fetch(`${EVENTS_API}/${club.id}/join`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ members: club.members + 1 })
+            });
+        } catch (error) {
+            console.error("Failed to update on backend", error);
+        } finally {
+            // Optimistically update the UI regardless of backend success for the demo
+            if (onJoinSuccess) {
+                onJoinSuccess(club.id);
+            }
+            setIsJoining(false);
+        }
+    };
     return (
         <motion.div
             initial={{ opacity: 0 }}
@@ -77,6 +102,22 @@ export function RsvpModal({ club, onClose }: EventModalProps) {
                             </div>
                         </div>
                     )}
+                </div>
+
+                <div className="p-6 border-t border-gray-100 bg-gray-50 flex gap-3">
+                    <button onClick={onClose} className="px-6 py-3 rounded-xl font-medium text-gray-600 bg-white border border-gray-200 hover:bg-gray-100 transition-colors">
+                        Cancel
+                    </button>
+                    <button
+                        onClick={handleJoin}
+                        disabled={isJoining || hasJoined}
+                        className={`flex-1 px-6 py-3 rounded-xl font-bold text-white shadow-md transition-colors flex items-center justify-center
+                            ${hasJoined
+                                ? 'bg-gray-400 cursor-not-allowed opacity-80'
+                                : 'bg-gradient-to-r from-gray-900 to-black hover:from-black hover:to-gray-900 disabled:opacity-50'}`}
+                    >
+                        {isJoining ? 'Joining...' : hasJoined ? 'Already Joined' : 'Join Event'}
+                    </button>
                 </div>
             </motion.div>
         </motion.div>
