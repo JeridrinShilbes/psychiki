@@ -7,29 +7,39 @@ interface EventModalProps {
     club: Club;
     onClose: () => void;
     hasJoined?: boolean;
+    userName: string;
     onJoinSuccess?: (clubId: string) => void;
 }
 import { EVENTS_API } from '../constants';
 
-export function RsvpModal({ club, onClose, hasJoined, onJoinSuccess }: EventModalProps) {
+export function RsvpModal({ club, onClose, hasJoined, userName, onJoinSuccess }: EventModalProps) {
     const [isJoining, setIsJoining] = useState(false);
 
     const handleJoin = async () => {
         setIsJoining(true);
         try {
             // Updated to be a generic POST endpoint /join
-            await fetch(`${EVENTS_API}/${club.id}/join`, {
+            const response = await fetch(`${EVENTS_API}/${club.id}/join`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ members: club.members + 1 })
+                body: JSON.stringify({ userName: userName })
             });
-        } catch (error) {
-            console.error("Failed to update on backend", error);
-        } finally {
-            // Optimistically update the UI regardless of backend success for the demo
+
+            if (!response.ok) {
+                const data = await response.json();
+                alert(data.message || "Failed to join event.");
+                setIsJoining(false);
+                return; // Do not update UI or call onJoinSuccess if it fails
+            }
+
+            // Successfully joined, update the UI
             if (onJoinSuccess) {
                 onJoinSuccess(club.id);
             }
+        } catch (error) {
+            console.error("Failed to update on backend", error);
+            alert("Network error. Please try again later.");
+        } finally {
             setIsJoining(false);
         }
     };
@@ -97,6 +107,22 @@ export function RsvpModal({ club, onClose, hasJoined, onJoinSuccess }: EventModa
                                 {club.tags.map(tag => (
                                     <span key={tag} className="text-xs text-[#18452B] bg-[#18452B]/10 px-3 py-1.5 rounded-lg font-medium">
                                         {tag}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {club.joinedUsers && club.joinedUsers.length > 0 && (
+                        <div>
+                            <div className="flex items-center gap-2 text-gray-400 mb-2">
+                                <Users size={14} />
+                                <h3 className="text-xs font-bold uppercase tracking-wider">Joined Members</h3>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                {club.joinedUsers.map((name, i) => (
+                                    <span key={i} className="text-xs text-gray-700 bg-gray-100 px-3 py-1.5 rounded-lg border border-gray-200/60 font-medium shadow-sm">
+                                        {name}
                                     </span>
                                 ))}
                             </div>

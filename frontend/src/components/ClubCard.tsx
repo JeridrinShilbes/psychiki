@@ -95,6 +95,19 @@ export function ClubCard({ club, onJoin, currentUser, onDelete, hasJoined }: Clu
                     )}
                 </div>
 
+                {club.joinedUsers && club.joinedUsers.length > 0 && (
+                    <div className="mb-4 bg-gray-50/50 p-2 rounded-xl border border-gray-100/80">
+                        <p className="text-[10px] uppercase font-bold text-gray-400 mb-2 tracking-wider">Joined by</p>
+                        <div className="flex flex-wrap gap-1.5">
+                            {club.joinedUsers.map((name, i) => (
+                                <span key={i} className="text-[11px] bg-white text-gray-600 px-2 py-0.5 rounded-md border border-gray-200/60 font-medium shadow-sm">
+                                    {name}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 <div className="mt-auto pt-4 flex items-center justify-between text-xs text-gray-500 font-medium border-t border-gray-100/80">
                     <div className="flex items-center gap-4">
                         <span className="flex items-center gap-1.5 font-semibold">

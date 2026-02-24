@@ -14,6 +14,7 @@ export interface Club {
     category: string;
     tags: string[];
     members: number;
+    joinedUsers?: string[];
     schedule: string;
     matchScore: number;
     author: string;

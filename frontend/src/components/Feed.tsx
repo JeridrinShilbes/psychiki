@@ -218,7 +218,7 @@ export function Feed({ user, setUser, activeFilter, setActiveFilter }: FeedProps
                             onEventClick={(club) => setRsvpModal({ isOpen: true, club })}
                             userLocation={userLocation}
                             selectedLocation={selectedLocation}
-                            hasJoined={(id) => !!user.joinedEvents?.includes(id)}
+                            hasJoined={(id) => !!clubs.find(c => c.id === id)?.joinedUsers?.includes(user.name)}
                         />
                     </div>
                 ) : (
@@ -235,7 +235,7 @@ export function Feed({ user, setUser, activeFilter, setActiveFilter }: FeedProps
                                     onJoin={() => setRsvpModal({ isOpen: true, club })}
                                     currentUser={user.name}
                                     onDelete={handleDeleteEvent}
-                                    hasJoined={user.joinedEvents?.includes(club.id)}
+                                    hasJoined={club.joinedUsers?.includes(user.name)}
                                 />
                             </motion.div>
                         ))}
@@ -249,9 +249,10 @@ export function Feed({ user, setUser, activeFilter, setActiveFilter }: FeedProps
                     <RsvpModal
                         club={rsvpModal.club}
                         onClose={() => setRsvpModal({ isOpen: false, club: null })}
-                        hasJoined={user.joinedEvents?.includes(rsvpModal.club.id)}
+                        hasJoined={rsvpModal.club.joinedUsers?.includes(user.name)}
+                        userName={user.name}
                         onJoinSuccess={(clubId) => {
-                            setClubs(prev => prev.map(c => c.id === clubId ? { ...c, members: c.members + 1 } : c));
+                            setClubs(prev => prev.map(c => c.id === clubId ? { ...c, members: c.members + 1, joinedUsers: [...(c.joinedUsers || []), user.name] } : c));
                             setUser({ ...user, joinedEvents: [...(user.joinedEvents || []), clubId] });
                             setRsvpModal({ isOpen: false, club: null });
                         }}
