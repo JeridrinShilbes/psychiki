@@ -6,69 +6,77 @@ import { Feed } from './components/Feed';
 import { Matchmaker } from './components/Matchmaker';
 import { Profile } from './components/Profile';
 import { Noticeboard } from './components/Noticeboard';
+import { AuthModal } from './components/AuthModal';
 
 // --- Main App Component ---
 export default function App() {
-  // Directly bypass the AuthScreen by initialising with a mock user.
-  // In a real application, you'd check authentication status here.
-  const [user, setUser] = useState<UserProfile | null>(() => {
-    const savedUser = localStorage.getItem('psychiki_user');
-    if (savedUser) {
-      try {
-        return JSON.parse(savedUser);
-      } catch (e) {
-        console.error('Failed to parse user from local storage', e);
-      }
-    }
-    return {
-      name: 'Jeridrin',
-      email: 'user@example.com',
-      primaryFocus: null, // Always starts null to demonstrate onboarding
-      interests: [],
-      joinedEvents: []
-    };
-  });
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
-  // Persist user to localStorage whenever it changes
   useEffect(() => {
-    if (user) {
-      localStorage.setItem('psychiki_user', JSON.stringify(user));
+    const token = localStorage.getItem('psychiki_token');
+    if (token) {
+      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/auth/me`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+          if (data) {
+            setUser({
+              ...data,
+              name: data.username,
+              joinedEvents: []
+            });
+          }
+        })
+        .catch(() => { })
+        .finally(() => setAuthLoading(false));
     } else {
-      localStorage.removeItem('psychiki_user');
+      setAuthLoading(false);
     }
-  }, [user]);
+  }, []);
 
   const [currentView, setCurrentView] = useState<string>('feed'); // feed, matchmaker, profile
   const [activeFilter, setActiveFilter] = useState<string>('All Clubs');
 
   const handleLogout = () => {
-    // In this mocked environment without a login screen, we simply re-initialize the user 
-    // instead of fully setting to null, to stay on the Onboarding screen.
-    setUser({
-      name: 'Jeridrin',
-      email: 'user@example.com',
-      primaryFocus: null,
-      interests: [],
-      joinedEvents: []
-    });
+    localStorage.removeItem('psychiki_token');
+    setUser(null);
     setCurrentView('feed');
   };
 
-  // Auth Screen Flow (Removed from this version)
-
-  // Onboarding Flow
-  if (user && !user.primaryFocus) {
+  if (authLoading) {
     return (
-      <Onboarding
-        onComplete={(focus) => setUser({ ...user, primaryFocus: focus })}
-        onSignOut={handleLogout}
-      />
+      <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center dark:bg-neutral-950">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-neutral-900 dark:border-white"></div>
+      </div>
     );
   }
 
-  // Fallback if user somehow becomes null (shouldnt happen with mock data)
+
+  // Unauthenticated Fallback -> auth modal + landing
   if (!user) {
-    return <div>Please reload the application.</div>;
+    return (
+      <>
+        <Onboarding onGetStarted={() => setShowAuthModal(true)} />
+        <AuthModal
+          isOpen={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+          onSuccess={(token, newUserData) => {
+            localStorage.setItem('psychiki_token', token);
+            setUser({
+              ...newUserData,
+              name: newUserData.username,
+              joinedEvents: []
+            });
+            setShowAuthModal(false);
+          }}
+        />
+      </>
+    );
   }
 
   // Main App Flow

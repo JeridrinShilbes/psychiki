@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Pencil } from 'lucide-react';
 import type { UserProfile } from '../types';
 import { ALL_TAGS } from '../constants';
 import { CategoryBadge } from './CategoryBadge';
@@ -10,9 +9,6 @@ interface ProfileProps {
 }
 
 export function Profile({ user, setUser }: ProfileProps) {
-    // Added state for the user's name and editing mode
-    const [localName, setLocalName] = useState<string>(user.name);
-    const [isEditingName, setIsEditingName] = useState(false);
 
     const [localInterests, setLocalInterests] = useState<string[]>(user.interests);
 
@@ -27,19 +23,8 @@ export function Profile({ user, setUser }: ProfileProps) {
     };
 
     const handleSave = () => {
-        // Now saves both the updated name and the updated interests
-        setUser({ ...user, name: localName, interests: localInterests });
-        setIsEditingName(false); // Close the edit input if it was open
-    };
-
-    const toggleEditName = () => {
-        if (isEditingName) {
-            // If we are currently editing and click the button to finish, save the name to global state immediately
-            setIsEditingName(false);
-            setUser({ ...user, name: localName, interests: localInterests });
-        } else {
-            setIsEditingName(true);
-        }
+        // Now saves the updated interests
+        setUser({ ...user, interests: localInterests });
     };
 
     return (
@@ -51,34 +36,14 @@ export function Profile({ user, setUser }: ProfileProps) {
 
             {/* User Info Card */}
             <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-6">
-                {/* Dynamic Avatar based on localName so it updates as you type */}
+                {/* Dynamic Avatar based on user.name */}
                 <div className="w-20 h-20 shrink-0 bg-gray-900 text-white rounded-2xl flex items-center justify-center text-3xl font-bold shadow-inner border border-gray-800">
-                    {(localName || 'U').charAt(0).toUpperCase()}
+                    {(user.name || 'U').charAt(0).toUpperCase()}
                 </div>
 
                 <div className="flex-1">
                     <div className="flex items-center gap-3 mb-1">
-                        {isEditingName ? (
-                            <input
-                                type="text"
-                                value={localName}
-                                onChange={(e) => setLocalName(e.target.value)}
-                                className="text-xl font-bold text-gray-900 border-b-2 border-gray-900 focus:outline-none bg-gray-50 px-2 py-1 rounded-t-md w-full max-w-[250px]"
-                                autoFocus
-                                onKeyDown={(e) => e.key === 'Enter' && toggleEditName()}
-                            />
-                        ) : (
-                            <h2 className="text-xl font-bold text-gray-900">{localName}</h2>
-                        )}
-
-                        {/* Edit Name Button */}
-                        <button
-                            onClick={toggleEditName}
-                            className="p-1.5 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
-                            title={isEditingName ? "Done editing" : "Edit name"}
-                        >
-                            <Pencil size={16} />
-                        </button>
+                        <h2 className="text-xl font-bold text-gray-900">{user.name}</h2>
                     </div>
 
                     <p className="text-gray-500 text-sm mb-3">{user.email}</p>

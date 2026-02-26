@@ -1,7 +1,36 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
+import L from 'leaflet';
 import { EVENTS_API } from '../constants';
 import type { Club } from '../types';
+import Crosshair from './Crosshair';
+
+const createCustomIcon = (imageUrl: string) => {
+    return L.divIcon({
+        className: 'custom-avatar-marker',
+        html: `<img src="${imageUrl}" alt="Marker" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" />`,
+        iconSize: [44, 44],
+        iconAnchor: [22, 22],
+        popupAnchor: [0, -22]
+    });
+};
+
+const blueDotIcon = L.divIcon({
+    className: 'custom-blue-dot',
+    html: `<div style="width: 16px; height: 16px; background-color: #4285F4; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.3);"></div>`,
+    iconSize: [22, 22],
+    iconAnchor: [11, 11]
+});
+
+function MapClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number) => void }) {
+    useMapEvents({
+        click(e) {
+            onMapClick(e.latlng.lat, e.latlng.lng);
+        },
+    });
+    return null;
+}
 
 const IMAGES_BY_CATEGORY: Record<string, string[]> = {
     'Cardio': [
@@ -47,12 +76,14 @@ const IMAGES_BY_CATEGORY: Record<string, string[]> = {
 
 interface EventFormProps {
     userName: string;
-    selectedLocation: { lat: number, lng: number } | null;
+    userLocation: [number, number] | null;
     onSuccess: (club: Club) => void;
     onCancel: () => void;
 }
 
-export function EventForm({ userName, selectedLocation, onSuccess, onCancel }: EventFormProps) {
+export function EventForm({ userName, userLocation, onSuccess, onCancel }: EventFormProps) {
+    const mapContainerRef = useRef<HTMLDivElement>(null);
+    const [selectedLocation, setSelectedLocation] = useState<{ lat: number, lng: number } | null>(null);
     const [isPosting, setIsPosting] = useState(false);
     const [newEventTitle, setNewEventTitle] = useState('');
     const [newEventDescription, setNewEventDescription] = useState('');
@@ -83,9 +114,13 @@ export function EventForm({ userName, selectedLocation, onSuccess, onCancel }: E
         };
 
         try {
+            const token = localStorage.getItem('psychiki_token');
             const response = await fetch(EVENTS_API, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                },
                 body: JSON.stringify(newEventData),
             });
 
@@ -110,7 +145,7 @@ export function EventForm({ userName, selectedLocation, onSuccess, onCancel }: E
             className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-8 overflow-hidden"
         >
             <h2 className="text-xl font-bold text-gray-900 mb-4">
-                Create a New Event {selectedLocation ? '(with map location)' : ''}
+                Create a New Event
             </h2>
             <form onSubmit={handleCreateEvent} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -172,6 +207,44 @@ export function EventForm({ userName, selectedLocation, onSuccess, onCancel }: E
                         <option value="Other">Other</option>
                     </select>
                 </div>
+
+                {/* Miniature Map for Location Selection */}
+                <div ref={mapContainerRef} className="w-full h-[250px] rounded-xl overflow-hidden shadow-sm border border-gray-200 relative z-0 mt-4 [&>div.leaflet-container]:cursor-crosshair">
+                    <Crosshair containerRef={mapContainerRef} color="#ffffff" targeted />
+                    <MapContainer
+                        key={userLocation ? userLocation.toString() : "default"}
+                        center={userLocation || [51.505, -0.09]}
+                        zoom={13}
+                        className="w-full h-full"
+                        style={{ zIndex: 0 }}
+                    >
+                        <TileLayer
+                            attribution='Tiles &copy; Esri'
+                            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                        />
+                        <MapClickHandler onMapClick={(lat, lng) => setSelectedLocation({ lat, lng })} />
+
+                        {userLocation && (
+                            <Marker position={userLocation} icon={blueDotIcon}>
+                                <Popup className="custom-popup">
+                                    <div className="font-bold text-gray-900 p-2">You are here</div>
+                                </Popup>
+                            </Marker>
+                        )}
+
+                        {selectedLocation && (
+                            <Marker
+                                position={[selectedLocation.lat, selectedLocation.lng]}
+                                icon={createCustomIcon('https://cdn-icons-png.flaticon.com/512/1828/1828817.png')}
+                            >
+                                <Popup className="custom-popup">
+                                    <div className="font-bold text-gray-900 p-2">📍 New Event</div>
+                                </Popup>
+                            </Marker>
+                        )}
+                    </MapContainer>
+                </div>
+
                 <div className="flex justify-end gap-3 mt-6">
                     <motion.button
                         whileTap={{ scale: 0.95 }}

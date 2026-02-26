@@ -1,53 +1,102 @@
-import { useState } from 'react';
-import { Flame, Wind, HeartHandshake, ArrowRight } from 'lucide-react';
+"use client";
+import { Globe3D, type GlobeMarker } from "@/components/ui/3d-globe";
+
+const sampleMarkers: GlobeMarker[] = [
+    {
+        lat: 40.7128,
+        lng: -74.006,
+        src: "https://assets.aceternity.com/avatars/1.webp",
+        label: "New York",
+    },
+    {
+        lat: 51.5074,
+        lng: -0.1278,
+        src: "https://assets.aceternity.com/avatars/2.webp",
+        label: "London",
+    },
+    {
+        lat: 35.6762,
+        lng: 139.6503,
+        src: "https://assets.aceternity.com/avatars/3.webp",
+        label: "Tokyo",
+    },
+    {
+        lat: -33.8688,
+        lng: 151.2093,
+        src: "https://assets.aceternity.com/avatars/4.webp",
+        label: "Sydney",
+    },
+    {
+        lat: 48.8566,
+        lng: 2.3522,
+        src: "https://assets.aceternity.com/avatars/5.webp",
+        label: "Paris",
+    },
+    {
+        lat: 28.6139,
+        lng: 77.209,
+        src: "https://assets.aceternity.com/avatars/6.webp",
+        label: "New Delhi",
+    },
+    {
+        lat: 55.7558,
+        lng: 37.6173,
+        src: "https://assets.aceternity.com/avatars/7.webp",
+        label: "Moscow",
+    },
+    {
+        lat: -22.9068,
+        lng: -43.1729,
+        src: "https://assets.aceternity.com/avatars/8.webp",
+        label: "Rio de Janeiro",
+    },
+    {
+        lat: 31.2304,
+        lng: 121.4737,
+        src: "https://assets.aceternity.com/avatars/9.webp",
+        label: "Shanghai",
+    },
+    {
+        lat: 25.2048,
+        lng: 55.2708,
+        src: "https://assets.aceternity.com/avatars/10.webp",
+        label: "Dubai",
+    },
+    {
+        lat: -34.6037,
+        lng: -58.3816,
+        src: "https://assets.aceternity.com/avatars/11.webp",
+        label: "Buenos Aires",
+    },
+    {
+        lat: 1.3521,
+        lng: 103.8198,
+        src: "https://assets.aceternity.com/avatars/12.webp",
+        label: "Singapore",
+    },
+    {
+        lat: 37.5665,
+        lng: 126.978,
+        src: "https://assets.aceternity.com/avatars/13.webp",
+        label: "Seoul",
+    },
+];
 
 interface OnboardingProps {
-    onComplete: (focus: string) => void;
-    onSignOut: () => void;
+    onComplete?: (focus: string) => void;
+    onGetStarted?: () => void;
 }
 
-export function Onboarding({ onComplete, onSignOut }: OnboardingProps) {
-    const [selectedFocus, setSelectedFocus] = useState<string | null>(null);
-
-    const options = [
-        {
-            id: 'Burn Energy',
-            title: 'Burn Energy',
-            description: 'Physical exhaustion, endorphins, fitness goals.\n\nPairs you with running, HIIT, and high-intensity clubs where you push limits and feel alive.',
-            icon: Flame,
-            bgImage: 'https://i.redd.it/098i3veoa4aa1.jpg',
-            overlay: 'from-[#D65D20] via-[#D65D20]/50 to-[#D65D20]/25',
-            activeRing: 'ring-[#D65D20]'
-        },
-        {
-            id: 'Clear Head',
-            title: 'Clear My Head',
-            description: 'Mental decompression, mindfulness, low-impact.\n\nConnects you with yoga, stretching, breathwork, and silent reading clubs for peace of mind.',
-            icon: Wind,
-            bgImage: 'https://images.unsplash.com/photo-1499209974431-9dddcece7f88?auto=format&fit=crop&q=80&w=600',
-            overlay: 'from-[#209A82] via-[#209A82]/50 to-[#209A82]/25',
-            activeRing: 'ring-[#209A82]'
-        },
-        {
-            id: 'Find People',
-            title: 'Find My People',
-            description: 'Deep socializing, venting, shared struggles.\n\nMatches you with walking-and-talking groups and post-workout coffee clubs built for real connection.',
-            icon: HeartHandshake,
-            bgImage: 'https://thumbs.dreamstime.com/b/female-athlete-chatting-other-participant-taking-break-339932071.jpg',
-            overlay: 'from-[#364A9F] via-[#364A9F]/50 to-[#364A9F]/25',
-            activeRing: 'ring-[#364A9F]'
-        }
-    ];
-
+export function Onboarding({ onComplete, onGetStarted }: OnboardingProps) {
     return (
-        <div className="min-h-screen bg-[#FAFAFA] flex flex-col relative font-sans">
-            <header className="absolute top-0 w-full p-6 flex justify-between items-center z-10">
+        <div className="min-h-screen bg-[#FAFAFA] flex flex-col relative font-sans dark:bg-neutral-950">
+            <header className="absolute top-0 w-full p-6 md:px-12 md:py-8 flex justify-between items-center z-50">
                 <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                         {/* This is the raw SVG code for a thin, minimalistic temple */}
                         <svg
                             viewBox="0 0 100 100"
-                            className="h-15 w-auto text-gray-800"
+                            className="h-12 w-auto text-neutral-900 dark:text-white"
                             fill="none"
                             stroke="currentColor"
                             strokeWidth="3"
@@ -59,67 +108,67 @@ export function Onboarding({ onComplete, onSignOut }: OnboardingProps) {
                             <path d="M70 45 V75" />          {/* Right Column */}
                             <path d="M20 80 H80" />          {/* Bottom Base */}
                         </svg>
-                        <span className="font-bold text-2xl tracking-tight text-gray-900">Psychiki</span>
+                        <span className="font-extrabold text-3xl tracking-tight text-neutral-900 dark:text-white">Psychiki</span>
                     </div>
                 </div>
-                <button onClick={onSignOut} className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">
-                    Sign out
-                </button>
+
             </header>
 
-            <div className="flex-1 flex flex-col items-center justify-center p-6 w-full max-w-6xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 mt-16 lg:mt-0">
-                <div className="text-center space-y-4 mb-12">
-                    <h1 className="text-7xl font-extrabold text-gray-900 tracking-tight">
-                        What brings you here?
-                    </h1>
-                    <p className="text-xl text-gray-500 font-medium">
-                        Choose your primary focus. This helps us match you with the right micro-clubs.
-                    </p>
-                </div>
-
-                <div className="grid md:grid-cols-3 gap-6 w-full max-w-4xl">
-                    {options.map((opt) => (
-                        <button
-                            key={opt.id}
-                            onClick={() => setSelectedFocus(opt.id)}
-                            className={`relative h-[26rem] rounded-[2.5rem] overflow-hidden text-left transition-all duration-300 group hover:-translate-y-2
-                ${selectedFocus === opt.id ? `ring-4 ring-offset-4 ${opt.activeRing} scale-[1.02]` : 'hover:shadow-2xl opacity-90 hover:opacity-100'}
-              `}
-                        >
-                            <img
-                                src={opt.bgImage}
-                                alt={opt.title}
-                                className="absolute inset-0 w-full h-full object-cover z-0 transition-transform duration-700 group-hover:scale-110"
-                            />
-                            <div className={`absolute inset-0 bg-gradient-to-t ${opt.overlay} z-10`}></div>
-
-                            <div className="absolute inset-0 z-20 p-8 flex flex-col justify-end">
-                                <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center mb-6 text-white border border-white/20">
-                                    <opt.icon size={20} strokeWidth={2.5} />
-                                </div>
-                                <h3 className="text-2xl font-bold mb-3 text-white tracking-tight">{opt.title}</h3>
-                                <p className="text-white/90 text-sm leading-relaxed whitespace-pre-line font-medium">
-                                    {opt.description}
-                                </p>
+            {/* Hero Section */}
+            <main className="flex-1 flex flex-col pt-32 pb-12 px-6 md:px-12 w-full">
+                <div className="relative mx-auto w-full max-w-[1400px] flex-1 min-h-[700px] overflow-hidden rounded-[2.5rem] bg-white shadow-2xl shadow-black/5 ring-1 ring-black/5 dark:bg-neutral-900 flex items-center">
+                    <div className="relative z-20 p-8 md:p-16 lg:p-20 w-full lg:w-[55%] max-w-2xl pointer-events-none">
+                        <div className="pointer-events-auto">
+                            <div className="inline-block mb-4 px-4 py-1.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-sm font-semibold text-neutral-700 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-700">
+                                Join the global community
                             </div>
-                        </button>
-                    ))}
-                </div>
+                            <h2 className="mb-6 text-5xl font-extrabold tracking-tight text-balance text-neutral-900 md:text-7xl lg:text-8xl dark:text-white leading-[1.1]">
+                                Play all over the world with a click.
+                            </h2>
+                            <p className="mt-4 max-w-xl text-balance text-neutral-600 md:mt-8 md:text-xl dark:text-neutral-400 leading-relaxed font-medium">
+                                Sign up for an account and start posting all over the world with one
+                                click. Discover micro-clubs and connect with amazing people wherever you go.
+                            </p>
 
-                <div className="mt-12">
-                    <button
-                        onClick={() => {
-                            if (selectedFocus) onComplete(selectedFocus);
-                        }}
-                        disabled={!selectedFocus}
-                        className="px-10 py-4 rounded-full font-bold text-lg flex items-center gap-2 transition-all duration-300
-              disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed
-              bg-gradient-to-r from-gray-900 to-black text-white hover:from-black hover:to-gray-900 shadow-lg hover:shadow-xl hover:-translate-y-0.5"
-                    >
-                        Continue <ArrowRight size={20} />
-                    </button>
+                            <div className="mt-10 flex flex-wrap gap-4 md:mt-12">
+                                <button
+                                    onClick={() => onGetStarted ? onGetStarted() : (onComplete && onComplete('Global'))}
+                                    className="flex cursor-pointer items-center justify-center rounded-2xl bg-neutral-900 px-8 py-4 font-semibold text-white shadow-[0px_0px_10px_0px_rgba(255,255,255,0.2)_inset] ring ring-white/20 ring-offset-2 ring-offset-neutral-900 transition-all duration-200 ring-inset hover:shadow-[0px_0px_20px_0px_rgba(255,255,255,0.4)_inset] hover:ring-white/40 active:scale-95 text-lg">
+                                    Get Started
+                                </button>
+                                <button
+                                    onClick={() => onComplete && onComplete('Learn More')}
+                                    className="flex cursor-pointer items-center justify-center rounded-2xl bg-white px-8 py-4 font-semibold text-neutral-900 ring ring-neutral-200 transition-all duration-200 ring-inset hover:bg-neutral-50 hover:ring-neutral-300 active:scale-95 shadow-sm text-lg">
+                                    Learn More
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Globe container - spans across the right side */}
+                    <div className="absolute -right-20 md:-right-10 lg:-right-32 xl:-right-40 top-1/2 -translate-y-1/2 z-10 w-[700px] h-[700px] md:w-[900px] md:h-[900px] lg:w-[1000px] lg:h-[1000px] xl:w-[1100px] xl:h-[1100px] pointer-events-auto">
+                        <Globe3D
+                            className="h-full w-full opacity-90 transition-opacity hover:opacity-100 duration-500"
+                            markers={sampleMarkers}
+                            config={{
+                                atmosphereColor: "#4da6ff",
+                                atmosphereIntensity: 20,
+                                bumpScale: 5,
+                                autoRotateSpeed: 0.3,
+                                markerSize: 0.08,
+                            }}
+                            onMarkerClick={(marker) => {
+                                console.log("Clicked marker:", marker.label);
+                            }}
+                            onMarkerHover={(marker) => {
+                                if (marker) {
+                                    console.log("Hovering:", marker.label);
+                                }
+                            }}
+                        />
+                    </div>
                 </div>
-            </div>
+            </main>
         </div>
     );
 }

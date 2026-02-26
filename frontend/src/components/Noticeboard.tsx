@@ -47,7 +47,13 @@ export function Noticeboard({ userName }: { userName: string }) {
                 return;
             }
 
-            const response = await fetch(API_URL);
+            const token = localStorage.getItem('psychiki_token');
+            const headers: HeadersInit = {};
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            const response = await fetch(API_URL, { headers });
             if (!response.ok) {
                 throw new Error(`Failed to fetch notices: ${response.statusText}`);
             }
@@ -95,10 +101,12 @@ export function Noticeboard({ userName }: { userName: string }) {
                 return;
             }
 
+            const token = localStorage.getItem('psychiki_token');
             const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
                 },
                 body: JSON.stringify(newNoticeData),
             });

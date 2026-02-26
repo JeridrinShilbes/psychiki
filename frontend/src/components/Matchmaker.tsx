@@ -124,11 +124,15 @@ Based on the user's feelings and goals, generate exactly 3 clubs.`;
             const API_URL = import.meta.env.VITE_RENDER_SERVER_URL + '/api/events';
 
             if (import.meta.env.VITE_RENDER_SERVER_URL && import.meta.env.VITE_RENDER_SERVER_URL !== 'undefined') {
+                const token = localStorage.getItem('psychiki_token');
                 for (const club of newClubs) {
                     try {
                         await fetch(API_URL, {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
+                            headers: {
+                                'Content-Type': 'application/json',
+                                ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                            },
                             body: JSON.stringify(club)
                         });
                     } catch (postErr) {

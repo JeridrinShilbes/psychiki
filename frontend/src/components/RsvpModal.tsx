@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { X, Users, Clock, Tag } from 'lucide-react';
+import { Users, Clock, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Club } from '../types';
+import { EVENTS_API } from '../constants';
+import { CardContainer, CardBody, CardItem } from './ui/3d-card';
 
 interface EventModalProps {
     club: Club;
@@ -9,19 +11,23 @@ interface EventModalProps {
     hasJoined?: boolean;
     userName: string;
     onJoinSuccess?: (clubId: string) => void;
+    onDelete?: (eventId: string, authorName: string) => void;
 }
-import { EVENTS_API } from '../constants';
 
-export function RsvpModal({ club, onClose, hasJoined, userName, onJoinSuccess }: EventModalProps) {
+export function RsvpModal({ club, onClose, hasJoined, userName, onJoinSuccess, onDelete }: EventModalProps) {
     const [isJoining, setIsJoining] = useState(false);
+    const isAuthor = userName === club.author;
 
     const handleJoin = async () => {
         setIsJoining(true);
         try {
-            // Updated to be a generic POST endpoint /join
+            const token = localStorage.getItem('psychiki_token');
             const response = await fetch(`${EVENTS_API}/${club.id}/join`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                },
                 body: JSON.stringify({ userName: userName })
             });
 
@@ -29,10 +35,9 @@ export function RsvpModal({ club, onClose, hasJoined, userName, onJoinSuccess }:
                 const data = await response.json();
                 alert(data.message || "Failed to join event.");
                 setIsJoining(false);
-                return; // Do not update UI or call onJoinSuccess if it fails
+                return;
             }
 
-            // Successfully joined, update the UI
             if (onJoinSuccess) {
                 onJoinSuccess(club.id);
             }
@@ -43,109 +48,116 @@ export function RsvpModal({ club, onClose, hasJoined, userName, onJoinSuccess }:
             setIsJoining(false);
         }
     };
+
     return (
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={onClose}
         >
-            <motion.div
-                initial={{ scale: 0.95, opacity: 0, y: 20 }}
-                animate={{ scale: 1, opacity: 1, y: 0 }}
-                exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl"
-            >
-                <div className="relative h-48">
-                    <img src={club.image} alt={club.title} className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                    <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={onClose}
-                        className="absolute top-4 right-4 text-white/70 hover:text-white bg-black/20 rounded-full p-1 backdrop-blur-md transition-colors"
+            <CardContainer className="inter-var">
+                <CardBody
+                    className="bg-white relative group/card dark:hover:shadow-2xl dark:hover:shadow-emerald-500/[0.1] dark:bg-black dark:border-white/[0.2] border-black/[0.1] w-auto sm:w-[35rem] h-auto rounded-3xl p-8 border"
+                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                >
+                    <CardItem
+                        translateZ="50"
+                        className="text-3xl font-bold text-gray-900 dark:text-white"
                     >
-                        <X size={20} />
-                    </motion.button>
-                    <div className="absolute bottom-4 left-6 text-white pr-6">
-                        <h2 className="text-2xl font-bold mb-1">{club.title}</h2>
-                        <p className="text-white/90 text-sm font-medium">{club.category}</p>
-                    </div>
-                </div>
+                        {club.title}
+                    </CardItem>
 
-                <div className="p-6 space-y-6">
-                    <div>
-                        <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">About</h3>
-                        <p className="text-gray-700 leading-relaxed">{club.description}</p>
-                    </div>
+                    <CardItem
+                        as="p"
+                        translateZ="60"
+                        className="text-gray-500 text-sm mt-2 dark:text-neutral-300 flex items-center gap-2"
+                    >
+                        <span className="font-semibold text-emerald-600 dark:text-emerald-400">{club.category}</span>
+                        <span>•</span>
+                        <span>Organized by {club.author}</span>
+                    </CardItem>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
-                            <div className="flex items-center gap-2 text-[#18452B] mb-1">
-                                <Clock size={16} />
-                                <span className="font-bold text-sm">When</span>
+                    <CardItem translateZ="100" className="w-full mt-6">
+                        <img
+                            src={club.image}
+                            height="1000"
+                            width="1000"
+                            className="h-60 w-full object-cover rounded-2xl group-hover/card:shadow-xl transition-shadow"
+                            alt={club.title}
+                        />
+                    </CardItem>
+
+                    <CardItem translateZ="40" className="w-full mt-6">
+                        <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-sm mb-4 line-clamp-3">
+                            {club.description}
+                        </p>
+
+                        <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-6">
+                            <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-gray-800/50 px-3 py-1.5 rounded-xl">
+                                <Clock size={16} className="text-emerald-600 dark:text-emerald-400" />
+                                <span className="font-semibold">{club.schedule}</span>
                             </div>
-                            <p className="text-gray-700 text-sm">{club.schedule}</p>
+                            <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-gray-800/50 px-3 py-1.5 rounded-xl">
+                                <Users size={16} className="text-emerald-600 dark:text-emerald-400" />
+                                <span className="font-semibold">{club.members} Joined</span>
+                            </div>
                         </div>
-                        <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
-                            <div className="flex items-center gap-2 text-[#18452B] mb-1">
-                                <Users size={16} />
-                                <span className="font-bold text-sm">Who</span>
-                            </div>
-                            <p className="text-gray-700 text-sm">{club.author}</p>
-                        </div>
-                    </div>
 
-                    {club.tags.length > 0 && (
-                        <div>
-                            <div className="flex items-center gap-2 text-gray-400 mb-2">
-                                <Tag size={14} />
-                                <h3 className="text-xs font-bold uppercase tracking-wider">Tags</h3>
-                            </div>
-                            <div className="flex flex-wrap gap-2">
+                        {club.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mb-2">
                                 {club.tags.map(tag => (
-                                    <span key={tag} className="text-xs text-[#18452B] bg-[#18452B]/10 px-3 py-1.5 rounded-lg font-medium">
+                                    <span key={tag} className="text-[11px] font-bold tracking-wide uppercase text-emerald-700 bg-emerald-50 dark:bg-emerald-900/30 dark:text-emerald-400 px-2.5 py-1 rounded-lg">
                                         {tag}
                                     </span>
                                 ))}
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </CardItem>
 
-                    {club.joinedUsers && club.joinedUsers.length > 0 && (
-                        <div>
-                            <div className="flex items-center gap-2 text-gray-400 mb-2">
-                                <Users size={14} />
-                                <h3 className="text-xs font-bold uppercase tracking-wider">Joined Members</h3>
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                                {club.joinedUsers.map((name, i) => (
-                                    <span key={i} className="text-xs text-gray-700 bg-gray-100 px-3 py-1.5 rounded-lg border border-gray-200/60 font-medium shadow-sm">
-                                        {name}
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </div>
+                    <div className="flex justify-between items-center mt-8">
+                        <div className="flex gap-2">
+                            <CardItem
+                                translateZ={20}
+                                as="button"
+                                onClick={onClose}
+                                className="px-6 py-2.5 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 transition-colors"
+                            >
+                                Cancel
+                            </CardItem>
 
-                <div className="p-6 border-t border-gray-100 bg-gray-50 flex gap-3">
-                    <button onClick={onClose} className="px-6 py-3 rounded-xl font-medium text-gray-600 bg-white border border-gray-200 hover:bg-gray-100 transition-colors">
-                        Cancel
-                    </button>
-                    <button
-                        onClick={handleJoin}
-                        disabled={isJoining || hasJoined}
-                        className={`flex-1 px-6 py-3 rounded-xl font-bold text-white shadow-md transition-colors flex items-center justify-center
-                            ${hasJoined
-                                ? 'bg-gray-400 cursor-not-allowed opacity-80'
-                                : 'bg-gradient-to-r from-gray-900 to-black hover:from-black hover:to-gray-900 disabled:opacity-50'}`}
-                    >
-                        {isJoining ? 'Joining...' : hasJoined ? 'Already Joined' : 'Join Event'}
-                    </button>
-                </div>
-            </motion.div>
+                            {isAuthor && onDelete && (
+                                <CardItem
+                                    translateZ={20}
+                                    as="button"
+                                    onClick={() => {
+                                        onDelete(club.id, club.author);
+                                        onClose();
+                                    }}
+                                    className="px-4 py-2.5 rounded-xl text-sm font-semibold text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30 transition-colors flex items-center gap-1.5"
+                                    title="Delete Event"
+                                >
+                                    <Trash2 size={16} /> <span className="hidden sm:inline">Delete</span>
+                                </CardItem>
+                            )}
+                        </div>
+
+                        <CardItem
+                            translateZ={20}
+                            as="button"
+                            onClick={handleJoin}
+                            disabled={isJoining || hasJoined}
+                            className={`px-8 py-2.5 rounded-xl text-sm font-bold transition-all shadow-md
+                                ${hasJoined
+                                    ? 'bg-gray-400 text-white cursor-not-allowed opacity-80'
+                                    : 'bg-black text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200'}`}
+                        >
+                            {isJoining ? 'Joining...' : hasJoined ? 'Already Joined' : 'Join Event'}
+                        </CardItem>
+                    </div>
+                </CardBody>
+            </CardContainer>
         </motion.div>
     );
 }

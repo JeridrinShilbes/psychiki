@@ -9,7 +9,7 @@ interface BentoHeroProps {
 
 export function BentoHero({ userName, onHostClick, variants }: BentoHeroProps) {
     return (
-        <motion.div variants={variants} className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <motion.div variants={variants} initial="hidden" animate="visible" exit="hidden" className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             <div className="md:col-span-2 bg-gradient-to-br from-white to-gray-50 border border-gray-200/60 rounded-[32px] p-8 sm:p-10 flex flex-col justify-center relative overflow-hidden shadow-[0_2px_20px_rgb(0,0,0,0.02)]">
                 <div className="absolute top-0 right-0 w-72 h-72 bg-gradient-to-bl from-gray-200/40 to-transparent rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
                 <h1 className="text-4xl sm:text-5xl font-bold tracking-tighter text-gray-900 mb-3 relative z-10">Welcome back, {userName}.</h1>

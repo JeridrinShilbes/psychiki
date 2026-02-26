@@ -28,10 +28,9 @@ export function Feed({ user, setUser, activeFilter, setActiveFilter }: FeedProps
 
     // Form States
     const [showCreateForm, setShowCreateForm] = useState(false);
-    const [selectedLocation, setSelectedLocation] = useState<{ lat: number, lng: number } | null>(null);
     const [rsvpModal, setRsvpModal] = useState<{ isOpen: boolean; club: Club | null }>({ isOpen: false, club: null });
 
-    const filters = ['All Clubs', 'Burn Energy', 'Clear Head', 'Find People'];
+    const filters = ['All Clubs', 'Burn Energy', 'Clear Head', 'Find People', 'My Events'];
 
     // Haversine formula to calculate distance in km
     const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -61,7 +60,12 @@ export function Feed({ user, setUser, activeFilter, setActiveFilter }: FeedProps
         setIsLoading(true);
         setError(null);
         try {
-            const response = await fetch(EVENTS_API);
+            const token = localStorage.getItem('psychiki_token');
+            const headers: HeadersInit = {};
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            const response = await fetch(EVENTS_API, { headers });
             if (!response.ok) throw new Error(`Server error: ${response.status}`);
             const data = await response.json();
 
@@ -90,10 +94,13 @@ export function Feed({ user, setUser, activeFilter, setActiveFilter }: FeedProps
         if (!window.confirm("Delete this event permanently?")) return;
 
         try {
+            const token = localStorage.getItem('psychiki_token');
             const response = await fetch(`${EVENTS_API}/${eventId}`, {
                 method: 'DELETE',
-                headers: { 'Content-Type': 'application/json', 'x-user-name': user.name },
-                body: JSON.stringify({ userName: user.name })
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                }
             });
 
             if (response.ok) {
@@ -108,11 +115,6 @@ export function Feed({ user, setUser, activeFilter, setActiveFilter }: FeedProps
     };
 
 
-
-    const handleMapClick = (lat: number, lng: number) => {
-        setSelectedLocation({ lat, lng });
-        setShowCreateForm(true);
-    };
 
     const getEventPosition = (event: Club): [number, number] => {
         if (event.lat && event.lng) return [event.lat, event.lng];
@@ -138,7 +140,9 @@ export function Feed({ user, setUser, activeFilter, setActiveFilter }: FeedProps
 
     const filteredClubs = (activeFilter === 'All Clubs'
         ? clubsWithDistance
-        : clubsWithDistance.filter(c => c.category === activeFilter))
+        : activeFilter === 'My Events'
+            ? clubsWithDistance.filter(c => c.author === user.name)
+            : clubsWithDistance.filter(c => c.category === activeFilter))
         .filter(c => maxDistance === 100 || (c.distance === undefined || c.distance <= maxDistance));
 
     const containerVariants: Variants = {
@@ -171,15 +175,13 @@ export function Feed({ user, setUser, activeFilter, setActiveFilter }: FeedProps
                 {showCreateForm && (
                     <EventForm
                         userName={user.name}
-                        selectedLocation={selectedLocation}
+                        userLocation={userLocation}
                         onSuccess={(club) => {
                             setClubs(prev => [club, ...prev]);
                             setShowCreateForm(false);
-                            setSelectedLocation(null);
                         }}
                         onCancel={() => {
                             setShowCreateForm(false);
-                            setSelectedLocation(null);
                         }}
                     />
                 )}
@@ -214,15 +216,13 @@ export function Feed({ user, setUser, activeFilter, setActiveFilter }: FeedProps
                     <div className="w-full h-full relative z-0">
                         <EventMap
                             events={filteredClubs}
-                            onMapClick={handleMapClick}
                             onEventClick={(club) => setRsvpModal({ isOpen: true, club })}
                             userLocation={userLocation}
-                            selectedLocation={selectedLocation}
-                            hasJoined={(id) => !!clubs.find(c => c.id === id)?.joinedUsers?.includes(user.name)}
                         />
                     </div>
                 ) : (
                     <motion.div
+                        key={activeFilter + '-' + maxDistance}
                         variants={containerVariants}
                         initial="hidden"
                         animate="visible"
@@ -233,8 +233,6 @@ export function Feed({ user, setUser, activeFilter, setActiveFilter }: FeedProps
                                 <ClubCard
                                     club={club}
                                     onJoin={() => setRsvpModal({ isOpen: true, club })}
-                                    currentUser={user.name}
-                                    onDelete={handleDeleteEvent}
                                     hasJoined={club.joinedUsers?.includes(user.name)}
                                 />
                             </motion.div>
@@ -256,6 +254,7 @@ export function Feed({ user, setUser, activeFilter, setActiveFilter }: FeedProps
                             setUser({ ...user, joinedEvents: [...(user.joinedEvents || []), clubId] });
                             setRsvpModal({ isOpen: false, club: null });
                         }}
+                        onDelete={handleDeleteEvent}
                     />
                 )}
             </AnimatePresence>
