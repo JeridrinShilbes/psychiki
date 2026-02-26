@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Notice } from '../types';
 import { Plus, Loader2, AlertCircle } from 'lucide-react';
+import { NOTICES_API } from '../constants';
 
 export function Noticeboard({ userName }: { userName: string }) {
     const [notices, setNotices] = useState<Notice[]>([]);
@@ -13,7 +14,7 @@ export function Noticeboard({ userName }: { userName: string }) {
     const [newTitle, setNewTitle] = useState('');
     const [newContent, setNewContent] = useState('');
 
-    const API_URL = import.meta.env.VITE_RENDER_SERVER_URL + '/api/notices';
+    const API_URL = NOTICES_API;
 
     useEffect(() => {
         fetchNotices();

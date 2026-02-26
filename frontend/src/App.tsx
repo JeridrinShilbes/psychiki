@@ -7,6 +7,7 @@ import { Matchmaker } from './components/Matchmaker';
 import { Profile } from './components/Profile';
 import { Noticeboard } from './components/Noticeboard';
 import { AuthModal } from './components/AuthModal';
+import { AUTH_API } from './constants';
 
 // --- Main App Component ---
 export default function App() {
@@ -17,7 +18,7 @@ export default function App() {
   useEffect(() => {
     const token = localStorage.getItem('psychiki_token');
     if (token) {
-      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/auth/me`, {
+      fetch(`${AUTH_API}/me`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

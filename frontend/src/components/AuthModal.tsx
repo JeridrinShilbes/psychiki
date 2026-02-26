@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { X, ArrowRight } from 'lucide-react';
+import { AUTH_API } from '../constants';
 
 interface AuthModalProps {
     isOpen: boolean;
@@ -42,8 +43,7 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
         setSuccessMsg('');
         setLoading(true);
 
-        const endpoint = mode === 'login' ? '/api/auth/login' : '/api/auth/register';
-        const url = `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${endpoint}`;
+        const url = `${AUTH_API}/${mode === 'login' ? 'login' : 'register'}`;
 
         const payload = mode === 'login'
             ? { email, password }
@@ -90,7 +90,7 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
         setSuccessMsg('');
         setLoading(true);
 
-        const url = `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/auth/verify-otp`;
+        const url = `${AUTH_API}/verify-otp`;
 
         try {
             const res = await fetch(url, {

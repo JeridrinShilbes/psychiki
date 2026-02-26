@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Sparkles } from 'lucide-react';
 import type { Club } from '../types';
-import { apiKey } from '../constants';
+import { apiKey, EVENTS_API } from '../constants';
 
 interface MatchmakerProps {
     onMatchmakerComplete: () => void;
@@ -121,7 +121,7 @@ Based on the user's feelings and goals, generate exactly 3 clubs.`;
             });
 
             // Post the newly generated clubs to the backend
-            const API_URL = import.meta.env.VITE_RENDER_SERVER_URL + '/api/events';
+            const API_URL = EVENTS_API;
 
             if (import.meta.env.VITE_RENDER_SERVER_URL && import.meta.env.VITE_RENDER_SERVER_URL !== 'undefined') {
                 const token = localStorage.getItem('psychiki_token');
